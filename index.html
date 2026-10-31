@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b1010">
+  <title>VOLT — Cube Run</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=DM+Mono:wght@400;500&display=swap');
+
+    :root {
+      color-scheme: dark;
+      --ink: #0b1010;
+      --panel: #111918;
+      --line: #283331;
+      --muted: #788784;
+      --paper: #e5f1eb;
+      --mint: #72f5be;
+      --coral: #ff755d;
+      --yellow: #f3d16b;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      min-height: 100vh;
+      margin: 0;
+      display: grid;
+      place-items: center;
+      padding: 28px;
+      background-color: var(--ink);
+      background-image: linear-gradient(rgba(114,245,190,.025) 1px, transparent 1px), linear-gradient(90deg, rgba(114,245,190,.025) 1px, transparent 1px);
+      background-size: 32px 32px;
+      color: var(--paper);
+      font-family: 'DM Mono', monospace;
+    }
+
+    .game { width: min(100%, 1080px); animation: arrive .55s ease-out both; }
+    @keyframes arrive { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .topbar { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 0 2px 15px; }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand-mark { width: 30px; height: 30px; display: grid; place-items: center; color: var(--ink); background: var(--mint); font: 900 18px/1 'Barlow Condensed', sans-serif; clip-path: polygon(0 0,100% 0,100% 70%,70% 100%,0 100%); }
+    .brand-name { font: 800 24px/.9 'Barlow Condensed', sans-serif; letter-spacing: 1px; }
+    .brand-name span { color: var(--mint); }
+    .brand-sub { margin-top: 5px; color: var(--muted); font-size: 9px; letter-spacing: 1.6px; }
+    .run-meta { display: flex; align-items: center; gap: 28px; color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: 1px; }
+    .run-meta strong { color: var(--paper); font-weight: 500; }
+    .run-meta .best strong { color: var(--yellow); }
+    .music-toggle { display: inline-flex; align-items: center; gap: 6px; padding: 6px 8px; color: var(--mint); border: 1px solid #3a4542; background: #141d1b; cursor: pointer; font: 9px 'DM Mono', monospace; letter-spacing: 1px; }
+    .music-toggle:hover { border-color: var(--mint); }
+    .music-toggle:focus-visible { outline: 2px solid white; outline-offset: 3px; }
+    .music-icon { font-size: 13px; }
+    .stage { position: relative; overflow: hidden; border: 1px solid #35413e; background: #0d1514; box-shadow: 0 18px 70px #0008, 0 0 0 5px #111817; }
+    canvas { display: block; width: 100%; aspect-ratio: 16 / 9; touch-action: none; }
+    .progress-track { height: 3px; background: #25302e; }
+    .progress-fill { width: 0; height: 100%; background: var(--mint); box-shadow: 0 0 12px var(--mint); transition: width .08s linear; }
+    .overlay { position: absolute; inset: 0; display: grid; place-items: center; background: rgba(8,13,13,.4); transition: opacity .2s ease, visibility .2s ease; }
+    .overlay.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+    .dialog { width: min(340px, calc(100% - 34px)); padding: 24px 24px 21px; text-align: center; background: rgba(13,21,20,.94); border: 1px solid #42504c; box-shadow: 0 12px 40px #0009; }
+    .eyebrow { color: var(--mint); font-size: 9px; letter-spacing: 2px; text-transform: uppercase; }
+    .dialog h1 { margin: 8px 0 5px; font: 900 46px/.95 'Barlow Condensed', sans-serif; text-transform: uppercase; }
+    .dialog p { margin: 0 0 17px; color: #a7b5af; font-size: 11px; line-height: 1.7; }
+    .level-select { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; margin: 0 0 16px; }
+    .level-button { min-width: 0; padding: 8px 4px 7px; color: #91a29a; border: 1px solid #35413e; background: #101715; cursor: pointer; }
+    .level-button:hover { border-color: #71847c; color: var(--paper); }
+    .level-button[aria-pressed="true"] { color: var(--mint); border-color: var(--mint); background: rgba(114,245,190,.08); }
+    .level-number { display: block; font: 800 19px/.95 'Barlow Condensed', sans-serif; }
+    .level-name { display: block; margin-top: 4px; font: 8px 'DM Mono', monospace; letter-spacing: .4px; }
+    .level-button:focus-visible { outline: 2px solid white; outline-offset: 2px; }
+    .play-button { width: 100%; min-height: 42px; display: flex; align-items: center; justify-content: center; gap: 10px; border: 0; color: #0b1411; background: var(--mint); cursor: pointer; font: 500 11px 'DM Mono', monospace; letter-spacing: 1px; text-transform: uppercase; transition: background .15s, transform .15s; }
+    .play-button:hover { background: #a2ffd5; transform: translateY(-1px); }
+    .play-button:focus-visible { outline: 2px solid white; outline-offset: 3px; }
+    .play-icon { font-size: 14px; }
+    .bottombar { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 15px 2px 0; color: var(--muted); font-size: 10px; }
+    .controls { display: flex; align-items: center; gap: 8px; }
+    .key { min-width: 24px; padding: 5px 7px; color: var(--paper); text-align: center; border: 1px solid #3a4542; border-bottom-width: 2px; background: #141d1b; }
+    .control-copy { margin-left: 3px; }
+    .legend { display: flex; align-items: center; gap: 7px; }
+    .legend i { width: 7px; height: 7px; display: inline-block; background: var(--coral); transform: rotate(45deg); }
+    .legend span { color: #a4afaa; }
+
+    @media (max-width: 600px) {
+      body { min-height: 100svh; padding: 16px 12px; }
+      .topbar { padding-bottom: 12px; }
+      .run-meta { gap: 13px; font-size: 9px; }
+      .brand-name { font-size: 21px; }
+      .brand-sub { font-size: 8px; }
+      .bottombar { align-items: flex-start; font-size: 9px; }
+      .legend { max-width: 120px; text-align: right; line-height: 1.5; }
+    }
+    @media (max-width: 380px) {
+      .run-meta { gap: 8px; }
+      .brand { gap: 8px; }
+      .run-meta .best { display: none; }
+    }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+  </style>
+</head>
+<body>
+  <main class="game" aria-label="VOLT Cube Run game">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">V</div>
+        <div><div class="brand-name">VOLT<span>/</span>RUN</div><div class="brand-sub" id="brand-sub">CUBE RUNNER · LEVEL 01</div></div>
+      </div>
+      <div class="run-meta">
+        <div>RUN <strong id="run-distance">000</strong></div>
+        <div class="best">BEST <strong id="best-distance">000</strong></div>
+        <button class="music-toggle" id="music-toggle" type="button" aria-label="Mute music" title="Mute music"><span class="music-icon" aria-hidden="true">♫</span><span id="music-state">ON</span></button>
+      </div>
+    </header>
+
+    <section class="stage" aria-label="Game arena">
+      <canvas id="game-canvas" aria-label="Cube-jumping platform game"></canvas>
+      <div class="overlay" id="overlay">
+        <div class="dialog">
+          <div class="eyebrow" id="dialog-eyebrow">AUTO-RUN · AUTO-JUMP ON</div>
+          <h1 id="dialog-title">Ready?</h1>
+          <p id="dialog-copy">The cube jumps over obstacles for you.</p>
+          <div class="level-select" role="group" aria-label="Choose a level">
+            <button class="level-button" type="button" data-level="0" aria-pressed="true"><span class="level-number">01</span><span class="level-name">WARM-UP</span></button>
+            <button class="level-button" type="button" data-level="1" aria-pressed="false"><span class="level-number">02</span><span class="level-name">STEP UP</span></button>
+            <button class="level-button" type="button" data-level="2" aria-pressed="false"><span class="level-number">03</span><span class="level-name">FULL SEND</span></button>
+          </div>
+          <button class="play-button" id="play-button" type="button"><span class="play-icon" id="play-icon">▶</span><span id="play-label">Start run</span></button>
+        </div>
+      </div>
+    </section>
+    <div class="progress-track" aria-label="Course progress"><div class="progress-fill" id="progress-fill"></div></div>
+    <footer class="bottombar">
+      <div class="controls"><span class="key">AUTO-JUMP</span><span class="key">SPACE / TAP</span><span class="control-copy">JUMP EARLY</span></div>
+      <div class="legend"><i aria-hidden="true"></i><span>CONTACT = WIPEOUT</span></div>
+    </footer>
+  </main>
+  <script src="game.js"></script>
+</body>
+</html>
