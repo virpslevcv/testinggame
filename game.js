@@ -22,7 +22,6 @@ const GROUND_Y = 430;
 const CUBE_SIZE = 30;
 const GRAVITY = 1450;
 const JUMP_VELOCITY = -575;
-const AUTO_JUMP_DISTANCE = 105;
 const palettes = {
   mint: '#72f5be',
   coral: '#ff755d',
@@ -54,13 +53,15 @@ const levels = [
   },
   {
     name: 'FULL SEND',
-    length: 7200,
-    speed: 270,
+    length: 8200,
+    speed: 370,
     obstacles: [
-      { x: 560, type: 'spike' }, { x: 1060, type: 'double' }, { x: 1590, type: 'block' },
-      { x: 2110, type: 'triple' }, { x: 2670, type: 'double' }, { x: 3230, type: 'block' },
-      { x: 3790, type: 'triple' }, { x: 4370, type: 'spike' }, { x: 4930, type: 'double' },
-      { x: 5490, type: 'block' }, { x: 6050, type: 'triple' }, { x: 6610, type: 'double' },
+      { x: 520, type: 'spike' }, { x: 900, type: 'double' }, { x: 1290, type: 'block' },
+      { x: 1650, type: 'triple' }, { x: 2140, type: 'spike' }, { x: 2580, type: 'double' },
+      { x: 3050, type: 'block' }, { x: 3520, type: 'triple' }, { x: 4120, type: 'spike' },
+      { x: 4560, type: 'double' }, { x: 5050, type: 'block' }, { x: 5550, type: 'triple' },
+      { x: 6100, type: 'double' }, { x: 6630, type: 'spike' }, { x: 7100, type: 'block' },
+      { x: 7600, type: 'triple' },
     ],
   },
 ];
@@ -92,6 +93,9 @@ let best = loadBest();
 let selectedLevel = 0;
 let scaleX = 1;
 let scaleY = 1;
+let screenShake = 0;
+let shakePhase = 0;
+let scorePulse = 0;
 let musicEnabled = true;
 let audioContext = null;
 let musicGain = null;
@@ -135,7 +139,7 @@ function selectLevel(index) {
   progressFill.style.width = '0%';
   dialogEyebrow.textContent = `LEVEL ${levelNumber} · ${level.name}`;
   dialogTitle.textContent = 'Ready?';
-  dialogCopy.textContent = 'Auto-jump is on. Choose a level and go.';
+  dialogCopy.textContent = 'Tap the screen or press Space to jump.';
   playIcon.textContent = '▶';
   playLabel.textContent = state === 'ready' ? 'Start run' : 'Start level';
 }
@@ -149,6 +153,20 @@ function resizeCanvas() {
   scaleY = canvas.height / HEIGHT;
 }
 
+function spawnBurst(x, y, count, color) {
+  particles.push(...Array.from({ length: count }, (_, index) => {
+    const angle = (Math.PI * 2 * index) / count;
+    return {
+      x,
+      y,
+      vx: Math.cos(angle) * (28 + Math.random() * 90),
+      vy: Math.sin(angle) * (28 + Math.random() * 90),
+      life: 0.45 + Math.random() * 0.7,
+      color,
+    };
+  }));
+}
+
 function startRun() {
   distance = 0;
   playerY = GROUND_Y - CUBE_SIZE / 2;
@@ -156,6 +174,8 @@ function startRun() {
   grounded = true;
   rotation = 0;
   jumpQueued = false;
+  screenShake = 0;
+  scorePulse = 0;
   particles = [];
   state = 'running';
   held = false;
@@ -170,10 +190,8 @@ function finishRun(won = false) {
   state = won ? 'won' : 'dead';
   held = false;
   jumpQueued = false;
-  particles = Array.from({ length: 24 }, (_, index) => {
-    const angle = (Math.PI * 2 * index) / 24;
-    return { x: PLAYER_X, y: playerY, vx: Math.cos(angle) * (65 + (index % 4) * 28), vy: Math.sin(angle) * (65 + (index % 4) * 28), life: 0.7 + (index % 5) * 0.08 };
-  });
+  screenShake = won ? 10 : 18;
+  spawnBurst(PLAYER_X, playerY, 22, won ? palettes.mint : palettes.coral);
   const score = Math.floor(distance / 10);
   if (score > best) {
     best = score;
@@ -192,6 +210,38 @@ function obstacleScreenX(obstacle) {
   return PLAYER_X + obstacle.x - distance;
 }
 
+function triangleIntersectsPlayer(spikeX, playerLeft, playerTop, playerRight, playerBottom) {
+  const triangle = [
+    [spikeX, GROUND_Y],
+    [spikeX + 16, GROUND_Y - obstacleShapes.spike.height],
+    [spikeX + 32, GROUND_Y],
+  ];
+  const rectangle = [
+    [playerLeft, playerTop],
+    [playerRight, playerTop],
+    [playerRight, playerBottom],
+    [playerLeft, playerBottom],
+  ];
+  const axes = [[1, 0], [0, 1]];
+
+  for (let index = 0; index < triangle.length; index += 1) {
+    const start = triangle[index];
+    const end = triangle[(index + 1) % triangle.length];
+    axes.push([start[1] - end[1], end[0] - start[0]]);
+  }
+
+  for (const [axisX, axisY] of axes) {
+    const triangleProjections = triangle.map(([x, y]) => x * axisX + y * axisY);
+    const rectangleProjections = rectangle.map(([x, y]) => x * axisX + y * axisY);
+    const triangleMin = Math.min(...triangleProjections);
+    const triangleMax = Math.max(...triangleProjections);
+    const rectangleMin = Math.min(...rectangleProjections);
+    const rectangleMax = Math.max(...rectangleProjections);
+    if (triangleMax < rectangleMin || rectangleMax < triangleMin) return false;
+  }
+  return true;
+}
+
 function collides() {
   const playerLeft = distance + PLAYER_X - CUBE_SIZE / 2;
   const playerRight = distance + PLAYER_X + CUBE_SIZE / 2;
@@ -199,10 +249,15 @@ function collides() {
   const playerBottom = playerY + CUBE_SIZE / 2;
   for (const obstacle of activeLevel().obstacles) {
     const shape = obstacleShapes[obstacle.type];
-    const inset = obstacle.type === 'block' ? 0 : 6;
-    const overlapsX = playerRight > obstacle.x + inset && playerLeft < obstacle.x + shape.width - inset;
-    const overlapsY = playerBottom > GROUND_Y - shape.height && playerTop < GROUND_Y;
-    if (overlapsX && overlapsY) return true;
+    if (obstacle.type === 'block') {
+      const overlapsX = playerRight > obstacle.x && playerLeft < obstacle.x + shape.width;
+      const overlapsY = playerBottom > GROUND_Y - shape.height && playerTop < GROUND_Y;
+      if (overlapsX && overlapsY) return true;
+      continue;
+    }
+    for (let index = 0; index < shape.count; index += 1) {
+      if (triangleIntersectsPlayer(obstacle.x + index * 30, playerLeft, playerTop, playerRight, playerBottom)) return true;
+    }
   }
   return false;
 }
@@ -211,15 +266,13 @@ function update(delta) {
   if (state === 'running') {
     const level = activeLevel();
     distance += level.speed * delta;
-    const playerWorldX = distance + PLAYER_X;
-    const nextObstacle = level.obstacles.find(obstacle => obstacle.x + obstacleShapes[obstacle.type].width > playerWorldX);
-    const extraWidth = nextObstacle ? obstacleShapes[nextObstacle.type].width - obstacleShapes.spike.width : 0;
-    const autoJumpDistance = AUTO_JUMP_DISTANCE - extraWidth * 0.8;
-    const autoJump = nextObstacle && nextObstacle.x - playerWorldX <= autoJumpDistance;
-    if (grounded && (jumpQueued || held || autoJump)) {
+    if (grounded && jumpQueued) {
       velocityY = JUMP_VELOCITY;
       grounded = false;
       jumpQueued = false;
+      screenShake = 7;
+      spawnBurst(PLAYER_X + 6, playerY + 8, 18, palettes.mint);
+      spawnBurst(PLAYER_X + 18, playerY + 2, 8, palettes.yellow);
     }
     if (!grounded) {
       playerY += velocityY * delta;
@@ -234,11 +287,14 @@ function update(delta) {
       }
     }
     const meters = Math.floor(distance / 10);
+    scorePulse = Math.max(0, scorePulse - delta * 2.5);
     distanceReadout.textContent = String(meters).padStart(3, '0');
     progressFill.style.width = `${Math.min(100, (distance / level.length) * 100)}%`;
     if (collides()) finishRun();
     else if (distance >= level.length) finishRun(true);
   }
+  shakePhase += delta * 32;
+  screenShake = Math.max(0, screenShake - delta * 14);
   for (const particle of particles) {
     particle.x += particle.vx * delta;
     particle.y += particle.vy * delta;
@@ -248,21 +304,42 @@ function update(delta) {
 }
 
 function drawBackground() {
-  ctx.fillStyle = '#0c1413';
+  const glowPulse = 0.18 + Math.sin(distance * 0.012) * 0.08;
+  const bg = ctx.createRadialGradient(
+    PLAYER_X + 180,
+    GROUND_Y - 120,
+    40,
+    PLAYER_X + 180,
+    GROUND_Y - 140,
+    420,
+  );
+  bg.addColorStop(0, `rgba(114, 245, 190, ${0.2 + glowPulse})`);
+  bg.addColorStop(0.4, 'rgba(25, 88, 68, 0.18)');
+  bg.addColorStop(1, '#0c1413');
+  ctx.fillStyle = bg;
   ctx.fillRect(0, 0, WIDTH, HEIGHT);
   const glow = ctx.createRadialGradient(PLAYER_X, playerY, 20, PLAYER_X, playerY, 470);
-  glow.addColorStop(0, 'rgba(25, 88, 68, 0.17)');
+  glow.addColorStop(0, `rgba(25, 88, 68, ${0.18 + glowPulse})`);
+  glow.addColorStop(0.55, 'rgba(10, 19, 17, 0.08)');
   glow.addColorStop(1, 'rgba(10, 19, 17, 0)');
   ctx.fillStyle = glow;
   ctx.fillRect(0, 0, WIDTH, HEIGHT);
 
   ctx.strokeStyle = 'rgba(142, 189, 169, .055)';
   ctx.lineWidth = 1;
-  for (let x = -((distance * 0.4) % 48); x < WIDTH; x += 48) {
+  for (let x = -((distance * 0.52) % 48); x < WIDTH; x += 48) {
     ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, HEIGHT); ctx.stroke();
   }
   for (let y = 24; y < HEIGHT; y += 48) {
     ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(WIDTH, y); ctx.stroke();
+  }
+  ctx.strokeStyle = 'rgba(114, 245, 190, 0.10)';
+  for (let index = 0; index < 8; index += 1) {
+    const y = 80 + index * 52 + Math.sin((distance * 0.06) + index) * 12;
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(WIDTH, y + Math.sin((distance * 0.04) + index) * 18);
+    ctx.stroke();
   }
   for (const mark of backgroundMarks) {
     const x = ((mark.x - distance * 0.13) % WIDTH + WIDTH) % WIDTH;
@@ -325,7 +402,7 @@ function drawCube() {
   ctx.translate(PLAYER_X, playerY);
   ctx.rotate(rotation);
   ctx.shadowColor = palettes.mint;
-  ctx.shadowBlur = 18;
+  ctx.shadowBlur = 20 + Math.sin(distance * 0.12) * 8;
   ctx.fillStyle = palettes.mint;
   ctx.fillRect(-CUBE_SIZE / 2, -CUBE_SIZE / 2, CUBE_SIZE, CUBE_SIZE);
   ctx.shadowBlur = 0;
@@ -340,7 +417,7 @@ function drawCube() {
 function drawParticles() {
   for (const particle of particles) {
     ctx.globalAlpha = Math.max(0, particle.life);
-    ctx.fillStyle = palettes.mint;
+    ctx.fillStyle = particle.color || palettes.mint;
     ctx.fillRect(particle.x, particle.y, 3, 3);
   }
   ctx.globalAlpha = 1;
@@ -348,10 +425,15 @@ function drawParticles() {
 
 function render() {
   ctx.setTransform(scaleX, 0, 0, scaleY, 0, 0);
+  const shakeX = Math.sin(shakePhase) * screenShake * 0.5;
+  const shakeY = Math.sin(shakePhase * 1.37) * screenShake * 0.35;
+  ctx.save();
+  ctx.translate(shakeX, shakeY);
   drawBackground();
   for (const obstacle of activeLevel().obstacles) drawObstacle(obstacle);
   drawCube();
   drawParticles();
+  ctx.restore();
   if (state === 'ready') {
     ctx.fillStyle = 'rgba(229, 241, 235, .55)';
     ctx.font = '10px "DM Mono", monospace';
