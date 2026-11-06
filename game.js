@@ -210,54 +210,17 @@ function obstacleScreenX(obstacle) {
   return PLAYER_X + obstacle.x - distance;
 }
 
-function triangleIntersectsPlayer(spikeX, playerLeft, playerTop, playerRight, playerBottom) {
-  const triangle = [
-    [spikeX, GROUND_Y],
-    [spikeX + 16, GROUND_Y - obstacleShapes.spike.height],
-    [spikeX + 32, GROUND_Y],
-  ];
-  const rectangle = [
-    [playerLeft, playerTop],
-    [playerRight, playerTop],
-    [playerRight, playerBottom],
-    [playerLeft, playerBottom],
-  ];
-  const axes = [[1, 0], [0, 1]];
-
-  for (let index = 0; index < triangle.length; index += 1) {
-    const start = triangle[index];
-    const end = triangle[(index + 1) % triangle.length];
-    axes.push([start[1] - end[1], end[0] - start[0]]);
-  }
-
-  for (const [axisX, axisY] of axes) {
-    const triangleProjections = triangle.map(([x, y]) => x * axisX + y * axisY);
-    const rectangleProjections = rectangle.map(([x, y]) => x * axisX + y * axisY);
-    const triangleMin = Math.min(...triangleProjections);
-    const triangleMax = Math.max(...triangleProjections);
-    const rectangleMin = Math.min(...rectangleProjections);
-    const rectangleMax = Math.max(...rectangleProjections);
-    if (triangleMax < rectangleMin || rectangleMax < triangleMin) return false;
-  }
-  return true;
-}
-
 function collides() {
   const playerLeft = distance + PLAYER_X - CUBE_SIZE / 2;
   const playerRight = distance + PLAYER_X + CUBE_SIZE / 2;
   const playerTop = playerY - CUBE_SIZE / 2;
   const playerBottom = playerY + CUBE_SIZE / 2;
   for (const obstacle of activeLevel().obstacles) {
+    if (obstacle.type !== 'block') continue;
     const shape = obstacleShapes[obstacle.type];
-    if (obstacle.type === 'block') {
-      const overlapsX = playerRight > obstacle.x && playerLeft < obstacle.x + shape.width;
-      const overlapsY = playerBottom > GROUND_Y - shape.height && playerTop < GROUND_Y;
-      if (overlapsX && overlapsY) return true;
-      continue;
-    }
-    for (let index = 0; index < shape.count; index += 1) {
-      if (triangleIntersectsPlayer(obstacle.x + index * 30, playerLeft, playerTop, playerRight, playerBottom)) return true;
-    }
+    const overlapsX = playerRight > obstacle.x && playerLeft < obstacle.x + shape.width;
+    const overlapsY = playerBottom > GROUND_Y - shape.height && playerTop < GROUND_Y;
+    if (overlapsX && overlapsY) return true;
   }
   return false;
 }
