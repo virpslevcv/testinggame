@@ -1,0 +1,2616 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mooncake Moonlight</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Noto+Sans+SC:wght@500;600;700&family=Noto+Serif+SC:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-1: #0c1016;
+      --bg-2: #1b2430;
+      --panel: rgba(18, 23, 30, 0.72);
+      --panel-strong: rgba(31, 40, 48, 0.96);
+      --line: rgba(255,255,255,0.12);
+      --ink: #f6eae8;
+      --muted: #c8d0d8;
+      --gold: #f2bf58;
+      --red: #d75c48;
+      --red-dark: #a93c31;
+      --green: #6fa393;
+      --blue: #82a9d3;
+      --shadow: rgba(0,0,0,0.32);
+    }
+
+    * { box-sizing: border-box; }
+    html {
+      font-size: 18px;
+      scroll-behavior: smooth;
+    }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "DM Sans", sans-serif;
+      font-size: 1.05rem;
+      background:
+        radial-gradient(circle at top, rgba(255, 200, 120, 0.14), transparent 20%),
+        linear-gradient(180deg, var(--bg-1), var(--bg-2) 42%, #0e1418 100%);
+      color: var(--ink);
+      position: relative;
+      overflow-x: hidden;
+    }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 20% 18%, rgba(255, 214, 173, 0.10), transparent 18%),
+        radial-gradient(circle at 80% 14%, rgba(239, 156, 162, 0.12), transparent 25%),
+        linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.10));
+      mix-blend-mode: screen;
+    }
+    button { font: inherit; }
+    button:focus-visible {
+      outline: 3px solid var(--gold);
+      outline-offset: 3px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px clamp(20px, 5vw, 80px);
+      border-bottom: 1px solid var(--line);
+      background: rgba(10, 14, 19, 0.32);
+      backdrop-filter: blur(10px);
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      font-size: 0.82rem;
+    }
+    .brand-mark {
+      width: 34px; height: 34px; display: grid; place-items: center;
+      border-radius: 50%; background: var(--red); box-shadow: 0 0 22px rgba(215, 92, 72, 0.45);
+      font-family: "Playfair Display", serif; font-size: 1.1rem;
+    }
+    .brand .cn {
+      color: var(--muted);
+      font-weight: 500;
+    }
+    .top-actions {
+      display: flex; gap: 10px; align-items: center;
+      flex-wrap: wrap;
+    }
+    .action-btn, .primary-btn, .listen-btn { min-height: 48px; }
+    .speech-status {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+    .action-btn, .primary-btn, .hero-card, .answer-btn {
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+    }
+    .action-btn, .primary-btn {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.03);
+      color: var(--ink);
+      padding: 9px 16px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-weight: 600;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+    }
+    .action-btn:hover, .primary-btn:hover, .hero-card:hover, .answer-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 16px 28px rgba(0,0,0,0.16), 0 0 18px rgba(242,191,88,0.12);
+    }
+
+    .page {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 22px 70px;
+    }
+    .hero {
+      display: flex;
+      justify-content: space-between;
+      gap: 32px;
+      align-items: end;
+      padding: 42px 0 18px;
+    }
+    .eyebrow {
+      margin: 0 0 12px;
+      color: #f5c7ba;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      font-size: 0.7rem;
+      font-weight: 700;
+    }
+    h1 {
+      margin: 0;
+      font-family: "Playfair Display", serif;
+      font-size: clamp(2.6rem, 5vw, 5rem);
+      line-height: 0.98;
+      letter-spacing: -0.04em;
+    }
+    .zh-title {
+      display: block;
+      font-family: "Noto Serif SC", serif;
+      color: #f0a18a;
+      font-size: clamp(1.2rem, 2vw, 2rem);
+      margin-top: 10px;
+    }
+    .intro-copy {
+      max-width: 340px;
+      margin: 0;
+      color: rgba(246, 234, 232, 0.8);
+      line-height: 1.7;
+      font-size: 0.98rem;
+    }
+
+    body[data-reading="easy"] {
+      --support-text: 1.08rem;
+      font-family: Arial, "Noto Sans SC", sans-serif;
+      letter-spacing: 0.01em;
+    }
+
+    body[data-reading="easy"] .scene .moon,
+    body[data-reading="easy"] .cloud-drift,
+    body[data-reading="easy"] .memory-glyph,
+    body[data-reading="easy"] .river-current path,
+    body[data-reading="easy"] .tower-beacon,
+    body[data-reading="easy"] .scene-character,
+    body[data-reading="easy"] .character-cape,
+    body[data-reading="easy"] .fox-tail,
+    body[data-reading="easy"] .level-art-icon,
+    body[data-reading="easy"] .hero-card.selected {
+      animation: none !important;
+    }
+
+    body[data-reading="easy"] .intro-copy,
+    body[data-reading="easy"] .story-copy,
+    body[data-reading="easy"] .story-copy-zh,
+    body[data-reading="easy"] .summary-box,
+    body[data-reading="easy"] .question-zh,
+    body[data-reading="easy"] .answer-btn span {
+      font-size: var(--support-text);
+      line-height: 1.9;
+    }
+
+    body[data-reading="easy"] .question-title,
+    body[data-reading="easy"] .story-title {
+      line-height: 1.25;
+      letter-spacing: -0.02em;
+    }
+
+    body[data-reading="easy"] .answer-btn {
+      padding: 16px 18px;
+      min-height: 112px;
+    }
+
+    body[data-reading="easy"] .answer-btn strong {
+      font-size: 1.08rem;
+      line-height: 1.5;
+    }
+
+    body[data-reading="easy"] .hero-card p,
+    body[data-reading="easy"] .hero-card h2 {
+      line-height: 1.45;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+
+    .scene {
+      position: relative;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      height: clamp(230px, 32vw, 410px);
+      background: linear-gradient(180deg, #1b2430 0%, #2d3946 38%, #10161d 100%);
+      box-shadow: 0 28px 54px rgba(0, 0, 0, 0.28);
+    }
+    .scene[data-scene="ruined"] {
+      background: linear-gradient(180deg, #171e2b 0%, #2c2633 42%, #0f1117 100%);
+    }
+    .scene[data-scene="river"] {
+      background: linear-gradient(180deg, #0e1d2a 0%, #17334a 40%, #0d1820 100%);
+    }
+    .scene[data-scene="river"] svg { filter: hue-rotate(28deg) saturate(1.18); }
+    .scene[data-scene="tower"] {
+      background: linear-gradient(180deg, #191a22 0%, #2a2332 36%, #0d0f18 100%);
+    }
+    .scene[data-scene="tower"] svg { filter: hue-rotate(325deg) brightness(.82) contrast(1.08); }
+    .scene svg {
+      display: block; width: 100%; height: 100%;
+    }
+    .scene .moon {
+      transform-origin: 938px 92px;
+      animation: moon-glow 5s ease-in-out infinite alternate;
+    }
+    .scene.arriving { animation: scene-arrive 0.8s ease-out; }
+    .scene.responding { animation: scene-response 0.65s ease-out; }
+    .cloud-drift { animation: cloud-drift 22s linear infinite alternate; }
+    .cloud-drift.second { animation-duration: 30s; animation-direction: alternate-reverse; }
+    .memory-glyph { transform-box: fill-box; animation: glyph-drift 6s ease-in-out infinite; }
+    .memory-glyph.second { animation-delay: -2s; animation-duration: 7s; }
+    .memory-glyph.third { animation-delay: -4s; animation-duration: 5s; }
+    .river-current { opacity: 0; transition: opacity 0.6s ease; }
+    .scene[data-scene="river"] .river-current { opacity: 1; }
+    .river-current path { animation: river-flow 5s linear infinite; }
+    .tower-structure { opacity: 0; transition: opacity 0.7s ease; }
+    .scene[data-scene="tower"] .tower-structure { opacity: 1; }
+    .tower-beacon { opacity: 0; transform-box: fill-box; transform-origin: bottom center; }
+    .scene[data-scene="tower"] .tower-beacon { animation: beacon-pulse 2.2s ease-in-out infinite; }
+    .scene[data-scene="ruined"] .scene-character.hero { animation-duration: 1.8s; }
+    .scene[data-scene="river"] .scene-character.fox { animation-duration: 2s; }
+    .scene[data-scene="tower"] .scene-character.hero { animation-duration: 1.2s; }
+    .scene[data-scene="tower"] .scene-spark { animation-duration: 1.4s; }
+    .scene-character {
+      transform-box: fill-box;
+      transform-origin: center bottom;
+      animation: character-bob 2.8s ease-in-out infinite;
+    }
+    .scene-character.fox { animation-delay: -0.8s; }
+    .scene-character.child { animation-delay: -1.4s; }
+    .character-cape { transform-origin: 50% 0; animation: cape-sway 2.4s ease-in-out infinite alternate; }
+    .fox-tail { transform-origin: 100% 75%; animation: tail-wag 0.8s ease-in-out infinite alternate; }
+    .scene-spark { animation: spark 2.6s ease-in-out infinite; }
+    @keyframes moon-glow {
+      from { opacity: 0.72; }
+      to { opacity: 1; }
+    }
+    @keyframes character-bob {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+    }
+    @keyframes cape-sway {
+      from { transform: rotate(-3deg); }
+      to { transform: rotate(4deg); }
+    }
+    @keyframes tail-wag {
+      from { transform: rotate(-12deg); }
+      to { transform: rotate(12deg); }
+    }
+    @keyframes spark {
+      0%, 100% { opacity: 0.2; transform: translateY(3px); }
+      50% { opacity: 1; transform: translateY(-5px); }
+    }
+    @keyframes cloud-drift {
+      from { transform: translateX(-18px); }
+      to { transform: translateX(34px); }
+    }
+    @keyframes glyph-drift {
+      0%, 100% { opacity: 0.28; transform: translateY(6px) rotate(-5deg); }
+      50% { opacity: 0.9; transform: translateY(-10px) rotate(5deg); }
+    }
+    @keyframes river-flow {
+      to { stroke-dashoffset: -80; }
+    }
+    @keyframes beacon-pulse {
+      0%, 100% { opacity: 0.25; transform: scaleY(0.88); }
+      50% { opacity: 0.9; transform: scaleY(1.08); }
+    }
+    @keyframes scene-arrive {
+      0% { filter: brightness(0.72); }
+      45% { filter: brightness(1.22); }
+      100% { filter: brightness(1); }
+    }
+    @keyframes scene-response {
+      0%, 100% { filter: brightness(1); box-shadow: 0 28px 54px rgba(0,0,0,0.28); }
+      45% { filter: brightness(1.22); box-shadow: 0 0 36px rgba(242,191,88,0.28); }
+    }
+    @keyframes panel-float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-4px); }
+    }
+    @keyframes faint-glow {
+      0%, 100% { box-shadow: 0 0 0 rgba(242,191,88,0); }
+      50% { box-shadow: 0 0 22px rgba(242,191,88,0.14); }
+    }
+    @keyframes choice-enter {
+      from { opacity: 0; transform: translateY(18px) translateZ(-12px) rotateX(8deg); }
+      to { opacity: 1; transform: translateY(0) translateZ(8px) rotateX(1deg); }
+    }
+    @keyframes level-enter {
+      from { opacity: 0; transform: translateY(14px) translateZ(-12px) rotateX(8deg) scale(.98); }
+      to { opacity: 1; transform: translateY(0) translateZ(8px) rotateX(1deg) scale(1); }
+    }
+    .answer-btn { animation: choice-enter 0.55s both; animation-delay: var(--entry-delay, 0ms); }
+    .hero-card { animation: choice-enter 0.55s both; animation-delay: var(--entry-delay, 0ms); }
+    .level-card { animation: level-enter 0.6s both; animation-delay: var(--entry-delay, 0ms); }
+    .hero-card.selected { animation-name: choice-enter, selected-glow; animation-duration: 0.55s, 2s; animation-iteration-count: 1, infinite; }
+    @keyframes selected-glow {
+      0%, 100% { box-shadow: 0 0 0 rgba(242,191,88,0); }
+      50% { box-shadow: 0 0 18px rgba(242,191,88,0.18); }
+    }
+    .scene[data-scene="river"] .scene-character { animation-duration: 3.5s; }
+    .scene[data-scene="tower"] .character-cape { animation-duration: 1.3s; }
+    body[data-mode="story"] .scene {
+      height: clamp(450px, 67vh, 760px);
+      border-radius: 22px;
+      box-shadow: 0 32px 80px rgba(0,0,0,0.42), 0 0 50px rgba(170,190,224,0.09);
+      perspective: 1200px;
+      perspective-origin: 50% 42%;
+      transform-style: preserve-3d;
+      isolation: isolate;
+    }
+    body[data-mode="story"] .hero { display: none; }
+    body[data-mode="story"] .scene::before {
+      content: "";
+      position: absolute;
+      z-index: 0;
+      inset: -12%;
+      pointer-events: none;
+      opacity: .8;
+      transform: translateZ(-180px) scale(1.28);
+      background:
+        radial-gradient(ellipse at 50% 100%, rgba(107,177,190,.2), transparent 38%),
+        radial-gradient(ellipse at 18% 25%, rgba(118,140,188,.18), transparent 32%),
+        linear-gradient(180deg, rgba(10,16,27,.05), rgba(7,11,18,.72));
+    }
+    body[data-mode="story"] .scene > svg {
+      display: none;
+    }
+    .city-world {
+      position: absolute;
+      z-index: 1;
+      inset: 0;
+      overflow: hidden;
+      perspective: 1050px;
+      transform-style: preserve-3d;
+      background: linear-gradient(180deg, #121c30 0%, #293146 55%, #141821 100%);
+    }
+    .city-world[data-city="river"] {
+      background: linear-gradient(180deg, #0d2539 0%, #255169 53%, #101a28 100%);
+    }
+    .city-world[data-city="tower"] {
+      background: linear-gradient(180deg, #111526 0%, #34263d 54%, #11141e 100%);
+    }
+    .city-sky {
+      position: absolute;
+      inset: 0;
+      transform: translateZ(-260px) scale(1.4);
+      background:
+        radial-gradient(circle at 75% 20%, rgba(255,235,194,.9) 0 18px, rgba(255,235,194,.18) 19px 36px, transparent 38px),
+        radial-gradient(ellipse at 50% 90%, rgba(95,164,188,.18), transparent 56%);
+    }
+    .city-sky::before,
+    .city-sky::after {
+      content: "";
+      position: absolute;
+      inset: 12% 5%;
+      background-image: radial-gradient(circle, rgba(255,255,255,.82) 0 1px, transparent 1.8px);
+      background-size: 87px 71px;
+      opacity: .46;
+    }
+    .city-sky::after { inset: 5% 22%; background-size: 121px 93px; opacity: .26; }
+    .city-water {
+      position: absolute;
+      z-index: 1;
+      left: -12%;
+      bottom: 8%;
+      width: 124%;
+      height: 30%;
+      opacity: 0;
+      transform: rotateX(69deg) translateZ(-35px);
+      transform-origin: center bottom;
+      background: repeating-linear-gradient(175deg, rgba(153,231,236,.42) 0 2px, transparent 2px 24px), linear-gradient(180deg, #35778a, #101c30);
+      box-shadow: 0 -18px 50px rgba(95,213,225,.28);
+      transition: opacity .6s ease;
+    }
+    .city-world[data-city="river"] .city-water { opacity: .9; }
+    .city-ground {
+      position: absolute;
+      z-index: 2;
+      left: -15%;
+      bottom: -36%;
+      width: 130%;
+      height: 64%;
+      transform: rotateX(73deg) translateZ(18px);
+      transform-origin: center top;
+      background:
+        linear-gradient(90deg, transparent 49.7%, rgba(238,205,151,.74) 50% 50.4%, transparent 50.7%),
+        repeating-linear-gradient(0deg, transparent 0 62px, rgba(255,255,255,.08) 63px 65px),
+        linear-gradient(180deg, #46515b, #151921 76%);
+      border-top: 2px solid rgba(202,222,227,.38);
+      box-shadow: 0 -20px 70px rgba(0,0,0,.38);
+    }
+    .city-ground::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 0;
+      width: 8px;
+      height: 100%;
+      transform: translateX(-50%);
+      background: repeating-linear-gradient(180deg, #f8d88c 0 28px, transparent 29px 54px);
+      opacity: .7;
+    }
+    .city-building {
+      position: absolute;
+      z-index: 2;
+      left: var(--x);
+      bottom: 17%;
+      width: clamp(72px, 10vw, 150px);
+      height: var(--height);
+      transform: translateZ(var(--z)) rotateY(var(--turn, -8deg));
+      transform-style: preserve-3d;
+      transform-origin: center bottom;
+      filter: drop-shadow(18px 16px 14px rgba(0,0,0,.36));
+    }
+    .city-face {
+      position: absolute;
+      backface-visibility: hidden;
+      border: 1px solid rgba(199,226,240,.12);
+    }
+    .city-face.front {
+      inset: 0;
+      transform: translateZ(clamp(18px, 2vw, 28px));
+      background:
+        repeating-linear-gradient(90deg, transparent 0 17px, rgba(242,211,154,.5) 18px 21px, transparent 22px 30px),
+        repeating-linear-gradient(0deg, transparent 0 22px, rgba(220,233,238,.18) 23px 25px, transparent 26px 35px),
+        linear-gradient(90deg, #263341, #475462 48%, #202b39);
+      box-shadow: inset 8px 0 rgba(5,11,20,.24), inset -8px 0 rgba(8,13,22,.3);
+    }
+    .city-face.side {
+      top: 0;
+      left: 50%;
+      width: clamp(28px, 4vw, 58px);
+      height: 100%;
+      transform: translateX(-50%) rotateY(90deg) translateZ(clamp(36px, 5vw, 74px));
+      background:
+        repeating-linear-gradient(0deg, transparent 0 22px, rgba(220,233,238,.12) 23px 25px, transparent 26px 35px),
+        linear-gradient(90deg, #101a29, #263342);
+    }
+    .city-face.roof {
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: clamp(28px, 4vw, 58px);
+      transform: translateY(-50%) rotateX(90deg) translateZ(var(--roof-depth, 26px));
+      background: linear-gradient(135deg, #64717c, #293847 72%);
+      box-shadow: inset 0 0 15px rgba(0,0,0,.4);
+    }
+    .city-building[data-shape="ruined"] .front {
+      clip-path: polygon(0 0, 29% 0, 35% 8%, 62% 8%, 69% 0, 100% 0, 100% 100%, 0 100%);
+    }
+    .city-world[data-city="river"] .city-building .front {
+      background:
+        repeating-linear-gradient(90deg, transparent 0 17px, rgba(121,225,230,.58) 18px 21px, transparent 22px 30px),
+        repeating-linear-gradient(0deg, transparent 0 22px, rgba(220,233,238,.2) 23px 25px, transparent 26px 35px),
+        linear-gradient(90deg, #183448, #386071 48%, #193148);
+    }
+    .city-world[data-city="tower"] .city-building .front {
+      background:
+        repeating-linear-gradient(90deg, transparent 0 17px, rgba(248,192,126,.54) 18px 21px, transparent 22px 30px),
+        repeating-linear-gradient(0deg, transparent 0 22px, rgba(230,216,243,.18) 23px 25px, transparent 26px 35px),
+        linear-gradient(90deg, #352c42, #625064 48%, #29263a);
+    }
+    .city-building[data-landmark="tower"] {
+      z-index: 3;
+      left: 45%;
+      width: clamp(88px, 13vw, 185px);
+      height: clamp(280px, 55vh, 520px);
+      transform: translateZ(72px) rotateY(-10deg);
+    }
+    .city-building[data-landmark="tower"] .front {
+      clip-path: polygon(10% 12%, 30% 0, 70% 0, 90% 12%, 100% 100%, 0 100%);
+      border-top: 4px solid rgba(255,218,156,.65);
+      box-shadow: inset 0 0 25px rgba(255,174,108,.2), 0 0 40px rgba(229,161,122,.24);
+    }
+    .city-building[data-landmark="tower"] .roof {
+      background: linear-gradient(135deg, #f1cd91, #6b5260 70%);
+      clip-path: polygon(50% 0, 100% 100%, 0 100%);
+    }
+    .city-cityscape {
+      position: absolute;
+      inset: 0;
+      transform-style: preserve-3d;
+      animation: city-camera-drift 22s ease-in-out infinite alternate;
+    }
+    @keyframes city-camera-drift {
+      from { transform: rotateY(-1deg) rotateX(1deg) translateX(-.4%); }
+      to { transform: rotateY(1deg) rotateX(-.5deg) translateX(.4%); }
+    }
+    body[data-mode="story"] .scene::after {
+      z-index: 3;
+      transform: translateZ(125px) scale(1.015);
+      mix-blend-mode: screen;
+    }
+    .vn-sprite {
+      position: absolute;
+      z-index: 2;
+      bottom: 0;
+      left: clamp(18px, 12vw, 170px);
+      width: clamp(190px, 28vw, 340px);
+      height: 88%;
+      transform-origin: center bottom;
+      filter: drop-shadow(0 10px 24px rgba(0,0,0,0.34));
+      transform-style: preserve-3d;
+      animation: sprite-arrive 0.55s cubic-bezier(.2,.8,.2,1) both;
+    }
+    .vn-sprite.talking {
+      animation: sprite-arrive .55s cubic-bezier(.2,.8,.2,1) both, sprite-talk 1.8s ease-in-out infinite, city-walk 18s ease-in-out infinite;
+    }
+    .vn-model {
+      width: 100%;
+      height: 100%;
+      transform: translateZ(96px) rotateY(-7deg) rotateX(2deg);
+      transform-style: preserve-3d;
+      filter: drop-shadow(14px 0 12px rgba(0,0,0,.2));
+      animation: model-turn 8s ease-in-out infinite alternate;
+    }
+    .vn-sprite svg { width: 100%; height: 100%; overflow: visible; }
+    .vn-sprite .sprite-hair { fill: url(#hair-shade); }
+    .vn-sprite .sprite-highlight { fill: url(#teal-highlight); }
+    .vn-sprite .sprite-coat { fill: url(#coat-shade); }
+    .vn-sprite .sprite-accent { fill: url(#skin-shade); }
+    .vn-sprite .sprite-eye { fill: #20232c; transform-box: fill-box; transform-origin: center; }
+    .vn-sprite .sprite-mouth { display: none; fill: none; stroke: #8d4652; stroke-width: 4; stroke-linecap: round; }
+    .vn-sprite[data-pose="thinking"] { --sprite-tilt: -2deg; }
+    .vn-sprite[data-pose="reassuring"] { --sprite-tilt: 2deg; }
+    .vn-sprite[data-expression="concerned"] .mouth-concerned,
+    .vn-sprite[data-expression="happy"] .mouth-happy,
+    .vn-sprite[data-expression="surprised"] .mouth-surprised,
+    .vn-sprite[data-expression="serious"] .mouth-serious { display: block; }
+    .vn-sprite[data-expression="serious"] .sprite-eye { transform: scaleY(.65); }
+    @keyframes sprite-arrive {
+      from { opacity: 0; transform: translateY(24px) scale(.96); }
+      to { opacity: 1; }
+    }
+    @keyframes sprite-talk {
+      0%, 100% { transform: translateY(0) rotate(var(--sprite-tilt, 0deg)); }
+      42% { transform: translateY(-7px) rotate(var(--sprite-tilt, 0deg)); }
+      60% { transform: translateY(-3px) rotate(var(--sprite-tilt, 0deg)); }
+    }
+    @keyframes scenery-depth {
+      from { transform: translateZ(-58px) scale(1.12) rotateX(3deg) translateX(-.4%); }
+      to { transform: translateZ(-58px) scale(1.14) rotateX(2deg) translateX(.4%); }
+    }
+    @keyframes model-turn {
+      from { transform: translateZ(96px) rotateY(-8deg) rotateX(2deg); }
+      to { transform: translateZ(96px) rotateY(-3deg) rotateX(1deg); }
+    }
+    @keyframes city-walk {
+      0%, 100% { translate: 0 0; }
+      38%, 58% { translate: clamp(32px, 22vw, 250px) 0; }
+      82% { translate: clamp(10px, 7vw, 78px) 0; }
+    }
+    @keyframes question-pop {
+      from { opacity: 0; transform: translate(-50%, -46%) scale(.82); }
+      to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    }
+    @keyframes screen-shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-8px); }
+      40%, 80% { transform: translateX(8px); }
+    }
+    body.dramatic-shake { animation: screen-shake 0.36s ease-in-out; }
+    .scene::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(0,0,0,0.20));
+      pointer-events: none;
+      animation: faint-glow 6s ease-in-out infinite;
+    }
+    .scene-caption {
+      position: absolute;
+      left: 18px;
+      bottom: 18px;
+      padding: 8px 10px;
+      background: rgba(27, 27, 27, 0.22);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 999px;
+      font-size: 0.78rem;
+      color: rgba(255,255,255,0.86);
+      backdrop-filter: blur(4px);
+      z-index: 2;
+    }
+    body[data-mode="story"] .scene-caption {
+      z-index: 5;
+      transform: translateZ(145px);
+      box-shadow: 0 12px 25px rgba(0,0,0,.35);
+    }
+
+    .game-shell {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 280px;
+      gap: 30px;
+      padding-top: 30px;
+    }
+    body[data-mode="story"] .game-shell {
+      position: relative;
+      z-index: 4;
+      display: block;
+      max-width: 1080px;
+      margin: -148px auto 0;
+      padding: 0 20px;
+    }
+
+    .game-main, .side-panel {
+      position: relative;
+      background: linear-gradient(180deg, rgba(18,23,30,0.88), rgba(17,21,26,0.74));
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      box-shadow: 0 20px 42px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.06);
+      overflow: hidden;
+      animation: panel-float 9s ease-in-out infinite alternate;
+    }
+    .game-main::before, .side-panel::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at top, rgba(255,255,255,0.06), transparent 35%);
+      pointer-events: none;
+    }
+    .game-main { min-height: 440px; padding: 24px 20px 20px; }
+    .side-panel { padding: 20px 18px; }
+    body[data-mode="story"] .game-main {
+      animation: none;
+      min-height: 0;
+      padding: clamp(20px, 3vw, 34px);
+      border: 1px solid rgba(255,255,255,0.55);
+      border-radius: 18px;
+      background: linear-gradient(145deg, rgba(15,20,31,0.96), rgba(28,32,45,0.94));
+      box-shadow: 0 22px 65px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.12);
+      overflow: visible;
+    }
+    body[data-mode="story"] .side-panel { display: none; }
+    .vn-dialogue {
+      position: relative;
+      z-index: 1;
+      margin: 0 0 18px;
+      padding: 2px 0 14px;
+      border-bottom: 1px solid rgba(255,255,255,0.16);
+      color: #f5e9e9;
+      font-size: clamp(1.05rem, 2vw, 1.3rem);
+      line-height: 1.75;
+    }
+    body[data-mode="story"] .game-main,
+    body[data-mode="story"] .vn-dialogue {
+      transform: none;
+      perspective: none;
+      transform-style: flat;
+    }
+    body[data-mode="story"] .answers,
+    body[data-mode="story"] .hero-grid,
+    body[data-mode="story"] .catalog-grid,
+    body[data-mode="story"] .reading-modes,
+    body[data-mode="story"] .reading-answers {
+      perspective: 950px;
+      transform-style: preserve-3d;
+    }
+    body[data-mode="story"] .answer-btn,
+    body[data-mode="story"] .hero-card,
+    body[data-mode="story"] .level-card,
+    body[data-mode="story"] .reading-mode,
+    body[data-mode="story"] .primary-btn,
+    body[data-mode="story"] .action-btn,
+    body[data-mode="story"] .listen-btn {
+      transform-style: preserve-3d;
+      border-bottom-width: 4px;
+      box-shadow: 0 12px 0 rgba(0,0,0,.16), 0 20px 35px rgba(0,0,0,.22);
+      text-shadow: 0 1px 0 rgba(255,255,255,.08);
+    }
+    body[data-mode="story"] .reading-mode,
+    body[data-mode="story"] .primary-btn,
+    body[data-mode="story"] .action-btn,
+    body[data-mode="story"] .listen-btn {
+      transform: perspective(650px) translateZ(8px) rotateX(1deg);
+    }
+    body[data-mode="story"] .answer-btn:hover,
+    body[data-mode="story"] .hero-card:hover,
+    body[data-mode="story"] .level-card.available:hover,
+    body[data-mode="story"] .reading-mode:hover,
+    body[data-mode="story"] .primary-btn:hover,
+    body[data-mode="story"] .action-btn:hover,
+    body[data-mode="story"] .listen-btn:hover {
+      animation: none;
+      transform: perspective(650px) translateY(-5px) translateZ(22px) rotateX(0);
+    }
+    .vn-speaker {
+      display: inline-block;
+      margin-bottom: 7px;
+      color: #ffd4c8;
+      font-size: .92em;
+      font-weight: 700;
+      letter-spacing: .04em;
+    }
+    .vn-question-popup {
+      position: fixed;
+      z-index: 20;
+      top: 50%;
+      left: 50%;
+      width: min(680px, calc(100vw - 32px));
+      max-height: min(86vh, 800px);
+      overflow: auto;
+      padding: clamp(22px, 5vw, 42px);
+      border: 2px solid rgba(255,255,255,.72);
+      border-radius: 22px;
+      background: linear-gradient(145deg, #242b3d, #121722 82%);
+      box-shadow: 0 30px 100px rgba(0,0,0,.78), 0 0 55px rgba(242,191,88,.18);
+      transform-style: preserve-3d;
+      border-bottom-width: 8px;
+      animation: question-pop .38s cubic-bezier(.2,.8,.2,1) both;
+    }
+    .vn-question-popup::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      pointer-events: none;
+      background: linear-gradient(135deg, rgba(255,255,255,.09), transparent 35%);
+    }
+    .vn-question-backdrop {
+      position: fixed;
+      z-index: 19;
+      inset: 0;
+      background: rgba(5,8,14,.74);
+      backdrop-filter: blur(5px);
+    }
+    .reading-word {
+      display: block;
+      margin: 18px 0;
+      color: #fff3d4;
+      text-align: center;
+      font-size: clamp(3rem, 12vw, 5.2rem);
+      font-weight: 700;
+      line-height: 1.25;
+      letter-spacing: .04em;
+      text-shadow: 0 3px 0 rgba(0,0,0,.35), 0 0 24px rgba(98,243,220,.22);
+    }
+    .reading-pronunciation {
+      margin: -8px 0 18px;
+      color: #d4dfef;
+      text-align: center;
+      font-size: 1.3rem;
+      font-weight: 700;
+    }
+    .reading-modes, .reading-answers {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin: 16px 0;
+    }
+    .reading-mode[aria-pressed="true"] {
+      border-color: var(--gold);
+      background: rgba(242,191,88,.2);
+    }
+    .reading-feedback {
+      min-height: 1.8em;
+      color: #b7e0c3;
+      text-align: center;
+      font-weight: 700;
+    }
+
+    .chapter-head {
+      display: flex; align-items: center; gap: 14px;
+      margin-bottom: 18px;
+    }
+    .chapter-number {
+      width: 40px; height: 40px; display: grid; place-items: center;
+      border: 1px solid rgba(240,161,138,0.7); border-radius: 50%;
+      color: #ffd4c8; font-family: "Playfair Display", serif; font-size: 1.05rem;
+    }
+    .chapter-meta {
+      color: var(--muted); font-size: 0.78rem;
+    }
+    .chapter-meta strong {
+      display: block; color: var(--ink); font-size: 0.9rem; margin-bottom: 3px;
+    }
+    .question-title {
+      margin: 0 0 10px;
+      font-family: "Playfair Display", serif;
+      font-size: clamp(2rem, 3vw, 2.8rem);
+      line-height: 1.2;
+    }
+    .question-zh {
+      margin: 0 0 22px;
+      color: var(--muted);
+      font-family: "Noto Serif SC", serif;
+      font-size: 1.12rem;
+      line-height: 1.8;
+    }
+
+    .answers {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .answer-btn {
+      padding: 14px 16px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(255,255,255,0.04);
+      color: var(--ink);
+      text-align: left;
+      cursor: pointer;
+    }
+    .answer-btn strong {
+      display: block; font-weight: 600; line-height: 1.5; font-size: 1.1rem;
+    }
+    .answer-btn span {
+      display: block; margin-top: 6px;
+      color: var(--muted);
+      font-size: 0.96rem;
+      font-family: "Noto Serif SC", serif;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin: 18px 0 24px;
+    }
+    .hero-card {
+      border: 1px solid var(--line); background: rgba(255,255,255,0.04); border-radius: 14px;
+      padding: 16px 14px; color: var(--ink); text-align: left; cursor: pointer;
+    }
+    .hero-card.selected {
+      border-color: rgba(242,191,88,0.8);
+      background: rgba(242,191,88,0.1);
+    }
+    .hero-role {
+      display: block; text-transform: uppercase; letter-spacing: 0.12em;
+      font-size: 0.66rem; color: #f5c7ba; margin-bottom: 8px;
+    }
+    .hero-card h2 {
+      margin: 0 0 8px; font-size: 1.7rem; font-family: "Playfair Display", serif;
+    }
+    .hero-card p {
+      margin: 0; color: var(--muted); line-height: 1.6; font-size: 1rem;
+    }
+
+    .catalog-intro { margin: 0 0 20px; color: var(--muted); line-height: 1.7; }
+    .catalog-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+    .level-card {
+      min-width: 0;
+      min-height: 270px;
+      overflow: hidden;
+      padding: 0;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: rgba(255,255,255,0.035);
+      color: var(--ink);
+      text-align: left;
+    }
+    button.level-card { font: inherit; cursor: pointer; }
+    .level-card.available { border-color: rgba(242,191,88,0.6); }
+    .level-card.available:hover { transform: translateY(-3px); box-shadow: 0 16px 28px rgba(0,0,0,0.2); }
+    .level-card.locked { opacity: 0.58; }
+    .level-art {
+      position: relative;
+      display: grid;
+      place-items: center;
+      height: 112px;
+      overflow: hidden;
+      background: linear-gradient(145deg, #9c5843, #252737 75%);
+    }
+    .level-art[data-level="1"] { background: linear-gradient(145deg, #ab6548, #29313e 76%); }
+    .level-art[data-level="2"] { background: linear-gradient(145deg, #477a83, #202b40 76%); }
+    .level-art[data-level="3"] { background: linear-gradient(145deg, #96704a, #35283c 76%); }
+    .level-art::before {
+      position: absolute;
+      content: "";
+      width: 74px;
+      height: 74px;
+      top: -30px;
+      right: 20px;
+      border: 1px solid rgba(255,255,255,0.25);
+      border-radius: 50%;
+      box-shadow: 0 0 0 12px rgba(255,255,255,0.035), 0 0 0 25px rgba(255,255,255,0.025);
+    }
+    .level-art-icon { position: relative; z-index: 1; font-size: 2.6rem; animation: character-bob 3s ease-in-out infinite; }
+    .level-number {
+      position: absolute;
+      bottom: 10px;
+      left: 12px;
+      color: rgba(255,255,255,0.82);
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .level-copy { padding: 14px; }
+    .level-status { display: flex; justify-content: space-between; gap: 8px; color: var(--muted); font-size: 0.72rem; }
+    .level-status strong { color: var(--gold); }
+    .level-copy h3 { margin: 10px 0 6px; font-size: 1.12rem; line-height: 1.3; }
+    .level-copy p { min-height: 44px; margin: 0; color: var(--muted); font-size: 0.9rem; line-height: 1.5; }
+    .level-action { display: block; margin-top: 12px; color: #ffd4c8; font-weight: 700; font-size: 0.88rem; }
+    .level-card.locked .level-action { color: var(--muted); }
+
+    .summary-box {
+      border: 1px solid var(--line); background: rgba(255,255,255,0.03); border-radius: 12px;
+      padding: 12px 14px; color: var(--muted); line-height: 1.6;
+    }
+    .summary-box strong { color: var(--ink); }
+    .process-title { margin: 0 0 12px; font-size: 1rem; }
+    .process-steps {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin: 0 0 20px;
+      padding: 0;
+      list-style: none;
+    }
+    .process-steps li {
+      min-height: 58px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: rgba(255,255,255,0.035);
+      line-height: 1.45;
+    }
+    .process-steps li span:first-child {
+      flex: 0 0 30px;
+      width: 30px;
+      height: 30px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: var(--red-dark);
+      font-weight: 700;
+    }
+    .listen-btn {
+      margin: 0 0 16px;
+      padding: 10px 16px;
+      border: 1px solid rgba(242,191,88,0.55);
+      border-radius: 999px;
+      background: rgba(242,191,88,0.1);
+      color: var(--ink);
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .story-panel {
+      animation: reveal 0.5s ease both;
+    }
+    .story-kicker {
+      margin: 0 0 8px;
+      color: #f5c7ba; font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 700;
+    }
+    .story-title {
+      margin: 0 0 8px; font-family: "Playfair Display", serif; font-size: clamp(2.3rem, 4vw, 3.4rem);
+      line-height: 1.08;
+    }
+    .story-title-zh {
+      margin: 0 0 18px;
+      color: var(--green); font-family: "Noto Serif SC", serif; font-size: 1.35rem;
+    }
+    .story-copy, .story-copy-zh {
+      margin: 0 0 12px;
+      line-height: 1.9;
+      color: rgba(246, 234, 232, 0.9);
+      font-size: 1.08rem;
+    }
+    .story-copy-zh {
+      color: var(--muted); font-family: "Noto Serif SC", serif;
+      font-size: 1.15rem;
+    }
+
+    body[data-mode="learn"] .scene,
+    body[data-mode="learn"] .side-panel {
+      display: none;
+    }
+    body[data-mode="learn"] .hero {
+      align-items: start;
+      padding-top: 34px;
+    }
+    body[data-mode="learn"] h1 {
+      font-size: clamp(2rem, 4vw, 3.2rem);
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+    }
+    body[data-mode="learn"] .zh-title {
+      font-size: clamp(1.2rem, 2vw, 1.7rem);
+    }
+    body[data-mode="learn"] .game-shell {
+      display: block;
+      max-width: 760px;
+      margin: 0 auto;
+      padding-top: 12px;
+    }
+    body[data-mode="learn"] .game-main {
+      min-height: 0;
+      padding: clamp(20px, 5vw, 36px);
+    }
+    .practice-heading {
+      margin: 0 0 8px;
+      font-size: clamp(1.7rem, 3vw, 2.2rem);
+    }
+    .practice-copy {
+      margin: 0 0 22px;
+      color: var(--muted);
+      line-height: 1.8;
+      font-size: 1.08rem;
+    }
+    .character-card {
+      display: grid;
+      grid-template-columns: minmax(110px, 0.7fr) 1fr;
+      align-items: center;
+      gap: 20px;
+      margin: 0 0 24px;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: rgba(255,255,255,0.035);
+    }
+    .character-glyph {
+      display: grid;
+      place-items: center;
+      min-height: 160px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.045);
+      color: #fff3d4;
+      font-family: "Noto Serif SC", serif;
+      font-size: clamp(6rem, 15vw, 8rem);
+      line-height: 1;
+    }
+    body[data-character-font="rounded"] .character-glyph,
+    body[data-character-font="rounded"] .character-option,
+    body[data-character-font="rounded"] .write-guide {
+      font-family: Arial, "Noto Sans SC", "Microsoft YaHei", "PingFang SC", sans-serif;
+      font-weight: 700;
+    }
+    .character-details {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.9;
+      font-size: 1.04rem;
+    }
+    .pinyin-value,
+    .cantonese-value {
+      display: inline-block;
+      color: var(--ink);
+      font-size: clamp(1.6rem, 5vw, 2.25rem);
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      line-height: 1.25;
+    }
+    .cantonese-value {
+      font-size: clamp(1.2rem, 3vw, 1.7rem);
+      letter-spacing: 0.03em;
+      color: #dfeeff;
+    }
+    .tone-mark {
+      color: #54d6ff;
+      text-shadow: 0 0 12px rgba(84, 214, 255, 0.45);
+    }
+    .character-details strong {
+      color: var(--ink);
+    }
+    .practice-options {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin: 18px 0;
+    }
+    .character-option {
+      min-height: 100px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(255,255,255,0.04);
+      color: var(--ink);
+      cursor: pointer;
+      font-family: "Noto Serif SC", serif;
+      font-size: 2.7rem;
+    }
+    .character-option:hover {
+      border-color: var(--gold);
+      background: rgba(242,191,88,0.1);
+    }
+    .practice-feedback {
+      min-height: 1.6em;
+      margin: 12px 0;
+      color: #b7e0c3;
+      font-weight: 700;
+    }
+    .practice-feedback.try-again {
+      color: #f5c7ba;
+    }
+    .write-board {
+      position: relative;
+      width: min(100%, 280px);
+      aspect-ratio: 1;
+      margin: 18px 0;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.28);
+      border-radius: 14px;
+      background-color: rgba(255,255,255,0.035);
+      background-image: linear-gradient(rgba(255,255,255,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.08) 1px, transparent 1px);
+      background-size: 50% 50%;
+    }
+    .write-guide,
+    #writing-canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+    .write-guide {
+      display: grid;
+      place-items: center;
+      color: rgba(255,255,255,0.16);
+      font-family: "Noto Serif SC", serif;
+      font-size: 12rem;
+      line-height: 1;
+      pointer-events: none;
+      user-select: none;
+    }
+    #writing-canvas {
+      touch-action: none;
+      cursor: crosshair;
+    }
+    .practice-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 16px 0;
+    }
+    .practice-actions .primary-btn {
+      background: var(--red-dark);
+    }
+    .practice-footnote {
+      max-width: 550px;
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    .practice-progress {
+      margin: 0 0 20px;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+    body[data-reading="easy"] .practice-copy,
+    body[data-reading="easy"] .character-details,
+    body[data-reading="easy"] .practice-footnote,
+    body[data-reading="easy"] .story-copy,
+    body[data-reading="easy"] .story-copy-zh,
+    body[data-reading="easy"] .answer-btn strong,
+    body[data-reading="easy"] .question-title,
+    body[data-reading="easy"] .hero-card h2,
+    body[data-reading="easy"] .hero-card p {
+      font-size: var(--support-text);
+      line-height: 1.9;
+    }
+    body[data-reading="easy"] .practice-heading {
+      font-size: 1.85rem;
+    }
+    body[data-reading="easy"] .character-glyph {
+      min-height: 180px;
+      font-size: clamp(6rem, 18vw, 8.5rem);
+    }
+    body[data-reading="easy"] .character-options,
+    body[data-reading="easy"] .character-option {
+      min-height: 110px;
+      font-size: 3.4rem;
+    }
+    body[data-reading="easy"] .write-guide {
+      font-size: 14rem;
+    }
+    body[data-reading="easy"] .character-details .pinyin-value,
+    body[data-reading="easy"] .character-details .cantonese-value {
+      font-size: clamp(2rem, 6vw, 3rem);
+    }
+
+    .stat-grid {
+      display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px;
+      margin-top: 14px;
+    }
+    .stat-box {
+      border: 1px solid var(--line); border-radius: 10px;
+      background: rgba(255,255,255,0.03); padding: 10px 12px;
+    }
+    .stat-label {
+      display: block; color: var(--muted); font-size: 0.64rem; text-transform: uppercase; letter-spacing: 0.12em;
+      margin-bottom: 6px;
+    }
+    .stat-value {
+      font-family: "Playfair Display", serif; font-size: 1.6rem;
+    }
+
+    .chapter-list {
+      list-style: none; margin: 0; padding: 0;
+    }
+    .chapter-list li {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 14px; color: rgba(255,255,255,0.7); font-size: 0.83rem;
+    }
+    .chapter-dot {
+      width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center;
+      border: 1px solid rgba(255,255,255,0.22); font-size: 0.7rem;
+      flex-shrink: 0;
+    }
+    .chapter-list li.active { color: var(--ink); font-weight: 700; }
+    .chapter-list li.active .chapter-dot { background: var(--green); border-color: var(--green); }
+    .chapter-list li.done .chapter-dot { background: var(--red); border-color: var(--red); }
+
+    .progress-wrap { margin-top: 20px; border-top: 1px solid var(--line); padding-top: 18px; }
+    .progress-copy {
+      display: flex; justify-content: space-between; gap: 12px; color: var(--muted); font-size: 0.72rem; margin-bottom: 8px;
+    }
+    .progress-track {
+      height: 6px; border-radius: 999px; overflow: hidden; background: rgba(255,255,255,0.08);
+    }
+    .progress-fill {
+      height: 100%; width: 0; background: linear-gradient(90deg, var(--red), var(--gold));
+      transition: width 0.25s ease;
+    }
+
+    @keyframes reveal {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 760px) {
+      .hero { display: block; }
+      .intro-copy { margin-top: 12px; max-width: 100%; }
+      .game-shell { grid-template-columns: 1fr; }
+      .answers { grid-template-columns: 1fr; }
+      .hero-grid { grid-template-columns: 1fr; }
+      .catalog-grid { grid-template-columns: 1fr; }
+      .process-steps { grid-template-columns: 1fr; }
+      .side-panel { order: -1; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand" aria-label="Mooncake Moonlight">
+      <span class="brand-mark" aria-hidden="true">月</span>
+      <span>MOONCAKE MOONLIGHT</span>
+      <span class="cn">月饼与月光</span>
+    </div>
+    <div class="top-actions">
+      <button class="action-btn" id="sound-toggle" type="button" aria-pressed="false">Sound: Off</button>
+      <button class="action-btn" id="easy-toggle" type="button">Easy read</button>
+      <button class="action-btn" id="language-toggle" type="button">中 / EN</button>
+      <button class="action-btn" id="font-toggle" type="button" aria-pressed="false">Character font: Serif</button>
+      <button class="action-btn" id="practice-toggle" type="button" hidden>Chinese character practice</button>
+      <button class="action-btn" id="reset-button" type="button">Restart</button>
+    </div>
+  </header>
+  <p class="speech-status" id="speech-status" role="status" aria-live="polite"></p>
+
+  <main class="page">
+    <section class="hero" aria-labelledby="page-title">
+      <div>
+        <p class="eyebrow" id="eyebrow">A small step. A new character.</p>
+        <h1 id="page-title">Read and write Chinese<span class="zh-title" id="page-title-zh">读写汉字</span></h1>
+      </div>
+      <p class="intro-copy" id="intro-copy">Learn one simple character at a time. Listen and try writing it. There is no timer and mistakes are part of learning.</p>
+    </section>
+
+    <div class="scene" id="scene" data-scene="ruined" role="img" aria-label="A ruined city skyline with broken buildings and moonlight">
+      <svg viewBox="0 0 1200 350" aria-hidden="true">
+        <defs>
+          <linearGradient id="sky" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stop-color="#171d2d"/>
+            <stop offset="100%" stop-color="#0b1015"/>
+          </linearGradient>
+        </defs>
+        <rect width="1200" height="350" fill="url(#sky)"/>
+        <circle class="moon" cx="938" cy="92" r="42" fill="#f4d9a0" opacity="0.9"/>
+        <g fill="#a9c7e6" opacity="0.25">
+          <circle cx="300" cy="80" r="3"/>
+          <circle cx="600" cy="70" r="4"/>
+          <circle cx="780" cy="105" r="2"/>
+          <circle cx="1100" cy="85" r="3"/>
+        </g>
+        <g class="cloud-drift" fill="#c3d1db" opacity="0.16">
+          <path d="M72 108q4-18 22-16 10-19 28-7 16-3 18 13 19 2 19 16H70q-9-3 2-6z"/>
+        </g>
+        <g class="cloud-drift second" fill="#d7c8b1" opacity="0.12">
+          <path d="M438 91q4-15 20-13 9-16 24-6 14-2 16 11 16 1 16 12H436q-7-2 2-4z"/>
+        </g>
+        <g class="memory-glyph" fill="#f2bf58" font-family="DM Sans, sans-serif" font-size="22" font-weight="700" aria-hidden="true">
+          <text x="254" y="119">A</text>
+        </g>
+        <g class="memory-glyph second" fill="#b8dce2" font-family="Noto Serif SC, serif" font-size="22" aria-hidden="true">
+          <text x="770" y="155">文</text>
+        </g>
+        <g class="memory-glyph third" fill="#f0a18a" font-family="Noto Serif SC, serif" font-size="19" aria-hidden="true">
+          <text x="1070" y="145">月</text>
+        </g>
+        <g fill="#2b2e36">
+          <rect x="20" y="190" width="90" height="120"/>
+          <rect x="120" y="172" width="72" height="138"/>
+          <rect x="210" y="150" width="86" height="160"/>
+          <rect x="300" y="180" width="74" height="130"/>
+          <rect x="388" y="138" width="110" height="172"/>
+          <rect x="516" y="166" width="82" height="144"/>
+          <rect x="606" y="142" width="112" height="168"/>
+          <rect x="728" y="176" width="84" height="134"/>
+          <rect x="820" y="150" width="118" height="160"/>
+          <rect x="954" y="156" width="92" height="154"/>
+          <rect x="1052" y="188" width="90" height="122"/>
+        </g>
+        <g fill="#c75d45" opacity="0.75">
+          <rect x="114" y="136" width="20" height="20"/>
+          <rect x="330" y="126" width="18" height="18"/>
+          <rect x="570" y="118" width="18" height="18"/>
+          <rect x="860" y="118" width="18" height="18"/>
+        </g>
+        <g fill="#d7c8b1">
+          <rect x="80" y="258" width="20" height="28"/>
+          <rect x="390" y="272" width="20" height="24"/>
+          <rect x="690" y="280" width="18" height="26"/>
+          <rect x="980" y="274" width="20" height="30"/>
+        </g>
+        <g class="scene-spark" fill="#f2bf58">
+          <path d="M708 187l5 11 11 5-11 5-5 11-5-11-11-5 11-5z"/>
+        </g>
+        <g class="scene-spark" fill="#f6eae8">
+          <path d="M824 224l4 8 8 4-8 4-4 8-4-8-8-4 8-4z"/>
+        </g>
+        <g class="river-current" fill="none" stroke="#8dd5db" stroke-width="3" stroke-linecap="round" opacity="0.65">
+          <path d="M0 322q70-10 140 0t140 0 140 0 140 0 140 0 140 0 140 0 140 0 140 0" stroke-dasharray="22 18"/>
+          <path d="M0 337q70-10 140 0t140 0 140 0 140 0 140 0 140 0 140 0 140 0 140 0" stroke-dasharray="15 24"/>
+        </g>
+        <g class="tower-structure">
+          <path d="M1000 310l24-185h58l30 185z" fill="#242c3d" stroke="#9bb3c5" stroke-opacity="0.45" stroke-width="3"/>
+          <path d="M1017 178h69M1013 223h77M1007 270h88" stroke="#7892a7" stroke-opacity="0.55" stroke-width="4"/>
+          <path class="tower-beacon" d="M1037 125l-52-83h136l-49 83z" fill="#f2bf58" opacity="0.6"/>
+          <circle cx="1053" cy="112" r="12" fill="#f2bf58"/>
+        </g>
+        <g class="scene-character hero" aria-hidden="true">
+          <ellipse cx="566" cy="310" rx="42" ry="8" fill="#090d12" opacity="0.65"/>
+          <path class="character-cape" d="M550 250q16-12 32 0l20 50h-72z" fill="#c75d45"/>
+          <path d="M553 249q13-21 26 0l-2 28h-22z" fill="#e8b889"/>
+          <path d="M550 250q16-29 32 0l-5 8h-23z" fill="#243b4b"/>
+          <circle cx="560" cy="263" r="2" fill="#20252b"/><circle cx="573" cy="263" r="2" fill="#20252b"/>
+          <path d="M561 274q6 5 11 0" fill="none" stroke="#70483e" stroke-width="2" stroke-linecap="round"/>
+          <path d="M546 267l-17 24M585 267l17 16" fill="none" stroke="#e8b889" stroke-width="7" stroke-linecap="round"/>
+          <circle cx="606" cy="286" r="7" fill="#f2bf58" opacity="0.9"/>
+        </g>
+        <g class="scene-character fox" aria-hidden="true">
+          <ellipse cx="668" cy="310" rx="31" ry="6" fill="#090d12" opacity="0.55"/>
+          <path class="fox-tail" d="M653 290q-20-22-24 2 12 12 27 3z" fill="#d75c48"/>
+          <path d="M648 290q8-15 23-7l12 13-13 14h-23l-8-10z" fill="#d77a43"/>
+          <path d="M649 284l2-12 10 9m8 0 9-10 1 16" fill="#d77a43"/>
+          <path d="M649 278l3-6 5 5m8 0 5-6 1 8" fill="#f2bf58"/>
+          <circle cx="656" cy="291" r="1.7" fill="#20252b"/><circle cx="670" cy="291" r="1.7" fill="#20252b"/>
+          <path d="M661 297l3 2 3-2" fill="none" stroke="#70483e" stroke-width="1.5"/>
+        </g>
+        <g class="scene-character child" aria-hidden="true">
+          <ellipse cx="756" cy="311" rx="25" ry="5" fill="#090d12" opacity="0.5"/>
+          <path d="M745 287q11-9 22 0l7 22h-36z" fill="#6fa393"/>
+          <circle cx="756" cy="279" r="11" fill="#e8b889"/>
+          <path d="M745 278q2-15 13-13 11 1 10 14l-7-6-12 5z" fill="#392b32"/>
+          <path d="M748 310v7m16-7v7" stroke="#e8b889" stroke-width="5" stroke-linecap="round"/>
+          <circle cx="753" cy="281" r="1.5" fill="#20252b"/><circle cx="760" cy="281" r="1.5" fill="#20252b"/>
+        </g>
+      </svg>
+      <span class="scene-caption" id="scene-caption">A ruined city and a desperate plea · 城市废墟，呼救声不断</span>
+    </div>
+
+    <section class="game-shell" aria-live="polite">
+      <div class="game-main" id="game-main"></div>
+      <aside class="side-panel" aria-label="Story progress panel">
+        <p class="eyebrow" id="side-title" style="margin-bottom: 18px; color: var(--muted); letter-spacing: .12em;">Your mission</p>
+        <ol class="chapter-list" id="chapter-list"></ol>
+        <div class="progress-wrap">
+          <div class="progress-copy"><span id="progress-label">Characters recovered</span><span id="progress-count">0 / 9</span></div>
+          <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="9" aria-valuenow="0">
+            <div class="progress-fill" id="progress-fill"></div>
+          </div>
+        </div>
+        <div class="stat-grid" id="stat-grid"></div>
+      </aside>
+    </section>
+  </main>
+
+  <script>
+    const chapters = [
+      {
+        title: "The Ruined City",
+        titleZh: "废墟中的城市",
+        questions: [
+          {
+            en: "The city is shattered and people are crying for help. Where do you go first?",
+            zh: "城市已经被摧毁，人们正在呼救。你先去哪里？",
+            answers: [
+              { en: "Search the collapsed streets for trapped people.", zh: "在倒塌的街道中寻找被困的人。", trait: "kind" },
+              { en: "Enter the ruined lab and find the source of the damage.", zh: "进入废弃实验室，寻找灾难的源头。", trait: "curious" },
+              { en: "Run straight toward the tower and confront the villain.", zh: "直接冲向高塔，面对制造灾难的人。", trait: "brave" },
+              { en: "Gather residents and form a rescue line.", zh: "召集居民，组织救援队。", trait: "kind" }
+            ]
+          },
+          {
+            en: "The old library is still standing, but children are trapped inside. What matters most?",
+            zh: "旧图书馆还在，但孩子们被困在里面。什么最重要？",
+            answers: [
+              { en: "Find the map of safe routes to the shelter.", zh: "寻找安全路线图，带领大家离开。", trait: "curious" },
+              { en: "Bring warm blankets, water and calm voices.", zh: "带来毛毯、水和安抚的声音。", trait: "kind" },
+              { en: "Break the blocked gate and force a way in.", zh: "强行破开堵住的门，冲进去救人。", trait: "brave" },
+              { en: "Inspect the archive for clues about the disaster.", zh: "检查档案，寻找灾难背后的真相。", trait: "curious" }
+            ]
+          },
+          {
+            en: "People keep crying, 'Please help us.' How do you respond?",
+            zh: "人们不断喊着：‘请帮助我们。’你怎么回应？",
+            answers: [
+              { en: "Lead the people to shelter and protect them.", zh: "带领居民前往避难所并保护他们。", trait: "kind" },
+              { en: "Follow the clues to the source of the destruction.", zh: "追踪线索，寻找破坏的源头。", trait: "curious" },
+              { en: "Storm the tower and stop the danger directly.", zh: "冲进高塔，直接终止危险。", trait: "brave" },
+              { en: "Shout across the city so no one is forgotten.", zh: "在全城传播呼救，确保没有人被遗忘。", trait: "kind" }
+            ]
+          }
+        ],
+        story: {
+          kind: ["The First Warning", "第一次警告", "You saved the frightened students and spread the truth before panic consumed the city. The scientist had stolen characters from both Chinese and English, and the world was starting to forget how to speak. The first crack in the evil plan opened, and the rescue became a fight for memory itself.", "你先救出了惊慌的学生，并在恐慌蔓延之前传递真相。科学家窃取了中文和英文的字符，世界正在逐渐失去语言能力。邪恶计划的第一道裂痕已出现，救援行动变成了一场对“记忆”的战斗。"],
+          curious: ["The Hidden Lab", "隐藏实验室", "You reached the ruined lab and found the broken language engine. It was not just deleting letters — it was stealing entire sets of characters from the world so people could not speak, write, or remember. A key from the archive pointed toward a deeper truth beneath the river.", "你来到被破坏的实验室，发现了损坏的语言引擎。它不只是删除字母，而是在窃取整套字符，让人类无法说话、写字、记忆。档案中的钥匙指向了河下更深的真相。"],
+          brave: ["The Blank Sky", "空白天空", "You forced your way into the tower and saw the damage for the first time. Signs, books, and bridges were collapsing into empty voids. Chinese characters and English letters were disappearing together, and even the sky felt like it was losing its memory.", "你强行闯入高塔，第一次看清了灾难的规模。路牌、书本和桥梁都在坠入空白。中文字符与英文字母同时消失，连天空都像在失去记忆。"]
+        }
+      },
+      {
+        title: "The River Archive",
+        titleZh: "河下档案馆",
+        questions: [
+          {
+            en: "At the river archive, you find a wall of missing characters. What do you recover first?",
+            zh: "在河下档案馆中，你发现了一面“失字墙”。你先恢复哪一部分？",
+            answers: [
+              { en: "A stack of Chinese character fragments from old books.", zh: "从旧书里找回中文字符碎片。", trait: "curious" },
+              { en: "A shelter for children who have lost their names.", zh: "为失去名字的孩子提供避难所。", trait: "kind" },
+              { en: "The professor's ledger of stolen scripts.", zh: "教授那本被盗文字的记录账册。", trait: "curious" },
+              { en: "A glowing box full of English letters.", zh: "一个还在发光的盒子，里面装着英文字母。", trait: "brave" }
+            ]
+          },
+          {
+            en: "The scientist wants the world to forget language itself. What truth do you uncover?",
+            zh: "科学家想让世界忘记语言本身。你发现了什么真相？",
+            answers: [
+              { en: "He plans to erase every character and control meaning alone.", zh: "他计划抹掉所有字符，让自己独自掌控意义。", trait: "brave" },
+              { en: "The machine only works when both languages are stolen together.", zh: "机器只有在两种语言被一起夺走时才能运转。", trait: "curious" },
+              { en: "The missing characters are stored in a hidden tower vault.", zh: "失落字符被保存在隐藏的塔楼金库中。", trait: "kind" },
+              { en: "The world can be saved only if everyone helps recover the letters.", zh: "只有大家一起找回字符，世界才有希望。", trait: "kind" }
+            ]
+          },
+          {
+            en: "You now know the villain's goal. How do you rally the city?",
+            zh: "你已经知道恶人的目标。你该如何团结城市？",
+            answers: [
+              { en: "Gather everyone to recite names, stories and poems.", zh: "让所有人一起说出名字、故事和诗句。", trait: "kind" },
+              { en: "Take the archive map to the old university and decode it.", zh: "把档案地图带到旧大学并破解密码。", trait: "curious" },
+              { en: "Lead a rescue team to the hidden vault before dawn.", zh: "在黎明前带领救援队冲入隐藏金库。", trait: "brave" },
+              { en: "Create a signal using restored letters so people can follow.", zh: "用恢复的字母发出信号，带领人们前进。", trait: "brave" }
+            ]
+          }
+        ],
+        story: {
+          kind: ["The Names Return", "名字回来了", "You opened the shelter, cared for the children who had lost their names, and led everyone to speak their own stories aloud. Chinese characters and English letters returned in the sound of their voices. The city began to understand that language was not a tool for power — it was the living memory of people.", "你打开了避难所，照顾失去名字的孩子，并带领大家大声说出自己的故事。中文字符和英文字母在声音中回来了。城市开始明白：语言不是权力的工具，而是人类活着的记忆。"],
+          curious: ["The Stolen Script", "被盗的文字", "The river archive exposed the truth: the professor had been collecting characters from both languages in a hidden vault beneath the city. He wanted every word erased so only his machine could define meaning. The archival map pointed to a final destination: the Tower of Final Letters.", "河下档案馆揭示了真相：教授一直在城市下方藏匿一座秘密金库，收集中英两种语言的字符。他想抹掉所有文字，让只有他的机器能定义意义。档案地图指向最后的目的地：终字之塔。"],
+          brave: ["The Vault Opens", "金库开启", "You broke into the hidden vault before dawn and recovered thousands of lost characters. The city gasped as fragments of Chinese and English words lit up again around them. The professor's plan was still alive, but the world had already started to fight back.", "你在黎明前冲入隐藏金库，夺回了数以千计的失字。城市在一片又一片中文与英文文字重新亮起时屏住了呼吸。教授的计划仍在，但世界已经开始反击。"]
+        }
+      },
+      {
+        title: "The Tower of Final Letters",
+        titleZh: "终字之塔",
+        questions: [
+          {
+            en: "At the top of the tower, Professor Ren unveils his final machine. What do you do first?",
+            zh: "在塔顶，任教授展示了最终机器。你先做什么？",
+            answers: [
+              { en: "Free the captured librarians and students below.", zh: "解救困在塔下的图书管理员和学生。", trait: "kind" },
+              { en: "Search the machine for the hidden reset switch.", zh: "在机器中寻找隐藏的重置开关。", trait: "curious" },
+              { en: "Stand in front of the machine and stop him yourself.", zh: "站在机器前，亲自阻止他。", trait: "brave" },
+              { en: "Call the city to bring every recovered character back.", zh: "呼吁全城把找回的字符送回来。", trait: "kind" }
+            ]
+          },
+          {
+            en: "The machine is powered by stolen characters from both languages. How do you destroy it?",
+            zh: "机器由中英两种语言的失字供能。你怎样摧毁它？",
+            answers: [
+              { en: "Return all lost characters to the machine at once.", zh: "将所有失字一起送回机器。", trait: "curious" },
+              { en: "Break the core while the professor is distracted.", zh: "趁教授分心时摧毁核心。", trait: "brave" },
+              { en: "Free the city and let everyone rebuild the language.", zh: "先解救人民，让他们一起重建语言。", trait: "kind" },
+              { en: "Force the machine to confess its lies with the recovered letters.", zh: "用找回的字母让机器暴露自己的谎言。", trait: "curious" }
+            ]
+          },
+          {
+            en: "The world is waiting. How should the final act end?",
+            zh: "整个世界都在等待。最后一幕该如何结束？",
+            answers: [
+              { en: "Let every person bring back a character and rebuild the world.", zh: "让每个人带回一个字符，一起重建世界。", trait: "kind" },
+              { en: "Expose the professor and let truth defeat his lie.", zh: "揭穿教授，真相击败他的谎言。", trait: "curious" },
+              { en: "Shatter the machine and break the plan forever.", zh: "粉碎机器，彻底打断邪恶计划。", trait: "brave" },
+              { en: "Offer the professor a chance to change and make amends.", zh: "给教授一个悔改的机会。", trait: "kind" }
+            ]
+          }
+        ],
+        story: {
+          kind: ["The World Remembers", "世界记起", "You gathered the city, the students, the librarians, and every recovered character together. As each person restored a letter or a word, Chinese and English became whole again. The machine cracked, the threat ended, and the world learned that language belongs to everyone, not to one man with a broken dream.", "你把城市、学生、图书管理员和每一枚找回的字母都聚在一起。随着每个人归还一个字词，中文和英文重新完整起来。机器裂开，威胁结束，世界终于明白：语言属于每个人，而不属于一个失控的科学家。"],
+          curious: ["The Truth in the Letters", "字里真相", "You exposed the hidden switch and showed the world the professor's lie: he had tried to turn language into a weapon. By returning the real characters to the machine and revealing the truth, you broke his control and restored meaning itself. Nothing could be erased again without the world noticing.", "你揭开了隐藏开关，把教授的谎言展现在世人面前：他试图把语言变成武器。通过将真实字符送回机器并公开真相，你打破了他的控制，让“意义”重新回到世界中。再也没有什么能在世界注意到之前悄悄消失。"],
+          brave: ["The Final Letter", "最后一字", "You stood in front of the machine and shattered its core while the city held its breath. The stolen characters flew back into the sky, returning to books, names, signs and stories. The whole world came alive again, and the evil scientist was defeated.", "你站在机器前，摧毁了核心，而整个城市屏住了呼吸。被窃取的字符冲回天空，重新回到书页、名字、路牌和故事中。整个世界再次苏醒，邪恶科学家也被击败。"]
+        }
+      }
+    ];
+
+    const characterLessons = [
+      { character: "月", mandarin: "yuè", cantonese: "jyut6", meaning: "moon", meaningZh: "月亮", word: "月亮", wordMandarin: "yuè liang", wordCantonese: "jyut6 loeng5", wordMeaning: "the moon" },
+      { character: "人", mandarin: "rén", cantonese: "jan4", meaning: "person", meaningZh: "人", word: "大人", wordMandarin: "dà rén", wordCantonese: "daai6 jan4", wordMeaning: "adult" },
+      { character: "口", mandarin: "kǒu", cantonese: "hau2", meaning: "mouth", meaningZh: "嘴巴", word: "门口", wordMandarin: "mén kǒu", wordCantonese: "mun4 hau2", wordMeaning: "doorway" }
+    ];
+
+    const ui = {
+      en: {
+        soundOn: "Sound: On",
+        soundOff: "Sound: Off",
+        fontSerif: "Character font: Serif",
+        fontRounded: "Character font: Rounded",
+        easy: "Easy read",
+        normal: "Normal read",
+        eyebrow: "A scientist's crime. A ruined world.",
+        intro: "A forbidden language engine erased both Chinese and English characters. Recover them before the entire city forgets how to speak.",
+        chapter: "Chapter",
+        question: "Question",
+        nextStory: "Back to levels",
+        finish: "See the ending",
+        ending: "Your ending",
+        again: "Play again",
+        restart: "Restart",
+        start: "Begin story",
+        catalogTitle: "Level catalog",
+        catalogIntro: "Finish a level to open the next one.",
+        available: "Ready",
+        complete: "Complete",
+        locked: "Locked",
+        playLevel: "Play this level →",
+        levelSummaries: ["Rescue people in the ruined city.", "Find the missing letters under the river.", "Reach the tower and stop the machine."],
+        roleLabel: "Choose your role",
+        rolePrompt: "Pick the path that fits your way of rescuing the world.",
+        processTitle: "How to play",
+        steps: ["Choose a hero.", "Choose English, Mandarin, or Cantonese.", "Read at your own pace and choose an answer.", "Unlock and enjoy the story."],
+        listen: "Listen in English + 中文",
+        listenStarting: "Reading the English and Chinese text.",
+        listenDone: "Reading finished.",
+        speechUnavailable: "Read-aloud is not available in this browser. Try Samsung Internet or Chrome.",
+        speechError: "Read-aloud stopped. Try again or check your device's speech settings.",
+        support: "A short story game with English and Chinese together. Take your time; there is no timer.",
+        progress: "Characters recovered",
+        stats: { hope: "Hope", memory: "Memory", courage: "Courage" },
+        heroNames: { pathfinder: "Pathfinder", healer: "Healer", champion: "Champion" },
+        heroCopy: {
+          pathfinder: "Tracks truth through ruins and broken maps.",
+          healer: "Protects the city with care, calm, and courage.",
+          champion: "Charges headfirst into danger and breaks the threat apart."
+        },
+        endingCopy: {
+          kind: ["The Keeper of Small Lights", "You made the moon feel less alone. By morning, the fox had found its way home, the lantern had found its hook, and the moon tucked your kindness into a new constellation. Every time someone shares warmth, another star shines.", "微光守护者"],
+          curious: ["The Collector of Wonder", "You followed every strange clue without asking the night to make sense. The fox became your companion, and the lantern became a tiny traveling library. Somewhere, another mystery was already waking up.", "奇迹收藏家"],
+          brave: ["The Friend Who Went First", "You stepped into the unknown, and the fox never had to follow alone. Together you gave the moon its laugh back and turned a quiet night into a story that will be told for years.", "第一个出发的朋友"]
+        }
+      },
+      zh: {
+        soundOn: "声音：开",
+        soundOff: "声音：关",
+        fontSerif: "汉字字体：宋体",
+        fontRounded: "汉字字体：黑体",
+        easy: "简易阅读",
+        normal: "正常阅读",
+        eyebrow: "科学家犯下的罪。世界失去语言。",
+        intro: "禁忌的语言引擎同时抹掉了中文和英文字符。找回它们，拯救这座城市，避免整个世界失去语言。",
+        chapter: "第",
+        question: "问题",
+        nextStory: "返回关卡目录",
+        finish: "查看结局",
+        ending: "你的结局",
+        again: "再玩一次",
+        restart: "重新开始",
+        start: "开始故事",
+        catalogTitle: "关卡目录",
+        catalogIntro: "完成一个关卡，就会开启下一个。",
+        available: "可以开始",
+        complete: "已完成",
+        locked: "未解锁",
+        playLevel: "开始这一关 →",
+        levelSummaries: ["在废墟城市中救人。", "找回河下失落的文字。", "登上高塔，阻止机器。"],
+        roleLabel: "选择你的角色",
+        rolePrompt: "选一条最适合你前进的道路。",
+        processTitle: "怎么玩",
+        steps: ["选择一个伙伴。", "选择英语、普通话或粤语。", "慢慢读，再选择答案。", "继续体验故事。"],
+        listen: "听英语 + 中文",
+        listenStarting: "正在朗读英文和中文。",
+        listenDone: "朗读结束。",
+        speechUnavailable: "此浏览器不支持朗读。请尝试 Samsung Internet 或 Chrome。",
+        speechError: "朗读已停止。请重试或检查设备的语音设置。",
+        support: "简短的中英双语故事游戏。慢慢来，没有计时。",
+        progress: "已找回字符",
+        stats: { hope: "希望", memory: "记忆", courage: "勇气" },
+        heroNames: { pathfinder: "探路者", healer: "守护者", champion: "勇者" },
+        heroCopy: {
+          pathfinder: "在废墟中追踪真相，带领大家前进。",
+          healer: "用关怀与冷静保护城市，帮助它复苏。",
+          champion: "直面危险，冲破每一道阻碍。"
+        },
+        endingCopy: {
+          kind: ["微光守护者", "你让月亮不再孤单。天亮前，狐狸找到了回家的路，灯笼也回到了挂钩上。月亮把你的善意藏进一片新的星座里。每当有人分享一点温暖，就会有一颗星星亮起来。", "The Keeper of Small Lights"],
+          curious: ["奇迹收藏家", "你追寻每一条奇怪的线索，从不要求夜晚讲道理。狐狸成了你的伙伴，灯笼变成了一座小小的旅行图书馆。某个地方，新的谜题已经醒来了。", "The Collector of Wonder"],
+          brave: ["第一个出发的朋友", "你率先走进未知，而狐狸从未需要独自跟上。你们一起找回了月亮的笑声，也把安静的夜晚变成了一段流传百年的故事。", "The Friend Who Went First"]
+        }
+      }
+    };
+
+    const practiceUi = {
+      en: {
+        eyebrow: "A small step. A new character.",
+        title: "Read and write Chinese",
+        titleZh: "读写汉字",
+        intro: "Learn one simple character at a time. Listen and try writing it. There is no timer and mistakes are part of learning.",
+        step: "Character",
+        studyTitle: "Look, listen, and say it",
+        studyCopy: "Take your time. Look at the character, listen to it, and say it aloud if you want.",
+        listen: "🔊 Listen",
+        practiceWriting: "✍️ Practice Writing",
+        chooseTitle: "Find the character",
+        chooseCopy: "Which character means",
+        correct: "That’s right!",
+        tryAgain: "Not this one. Try again; there is no rush.",
+        writeTitle: "Try writing it",
+        writeCopy: "Trace the faint character or write it from memory. You can also practise on paper.",
+        writingLabel: "Writing area. Draw the character with a finger, mouse, or stylus.",
+        clear: "Clear",
+        next: "Next character",
+        finish: "Finish practice",
+        skip: "Skip writing",
+        writingNote: "Your writing is not scored or saved.",
+        pinyin: "Mandarin",
+        cantonese: "Cantonese",
+        meaning: "Meaning",
+        example: "Word",
+        progress: "Character",
+        completeTitle: "You practised three characters!",
+        completeCopy: "Nice work. You can practise again or explore the story game.",
+        practiceAgain: "Practise again",
+        storyAdventure: "🎮 Start Game Challenge",
+        storyMode: "Story game",
+        storySupport: "A bilingual story adventure. Take your time; there is no timer.",
+        returnPractice: "Chinese character practice",
+        statusDone: "You finished this practice set."
+      },
+      zh: {
+        eyebrow: "一步一步，认识一个新汉字。",
+        title: "读写汉字",
+        titleZh: "Read and write Chinese",
+        intro: "一次学习一个简单的汉字。听一听，再试着写一写。不计时，写错了也没关系。",
+        step: "汉字",
+        studyTitle: "看一看，听一听，说一说",
+        studyCopy: "慢慢来。看看这个字，听它的读音。你也可以跟着说。",
+        listen: "🔊 听一听",
+        practiceWriting: "✍️ 练习书写",
+        chooseTitle: "找一找这个汉字",
+        chooseCopy: "哪个字的意思是",
+        correct: "答对了！",
+        tryAgain: "不是这个字，再试一次。不着急。",
+        writeTitle: "试着写一写",
+        writeCopy: "描一描浅色的字，或试着凭记忆写。也可以在纸上练习。",
+        writingLabel: "书写区。用手指、鼠标或触控笔写字。",
+        clear: "擦掉重写",
+        next: "下一个字",
+        finish: "完成练习",
+        skip: "跳过书写",
+        writingNote: "你的书写不会被评分或保存。",
+        pinyin: "普通话",
+        cantonese: "粤语",
+        meaning: "意思",
+        example: "词语",
+        progress: "汉字",
+        completeTitle: "你练习了三个汉字！",
+        completeCopy: "做得好！你可以再练习一次，也可以去玩故事游戏。",
+        practiceAgain: "再练习一次",
+        storyAdventure: "🎮 开始游戏挑战",
+        storyMode: "故事游戏",
+        storySupport: "一个中英双语故事游戏。慢慢来，没有计时。",
+        returnPractice: "汉字练习",
+        statusDone: "这组练习完成了。"
+      }
+    };
+
+    const heroes = {
+      pathfinder: { hope: 8, memory: 18, courage: 10 },
+      healer: { hope: 18, memory: 10, courage: 8 },
+      champion: { hope: 10, memory: 8, courage: 18 }
+    };
+
+    const state = {
+      language: "en",
+      accessible: true,
+      soundEnabled: false,
+      roundedFont: false,
+      phase: "start",
+      lessonIndex: 0,
+      practiceStep: "study",
+      practiceFeedback: "",
+      chapterIndex: 0,
+      questionIndex: 0,
+      hero: "pathfinder",
+      readingMode: "mandarin",
+      readingFeedback: "",
+      readingComplete: false,
+      answers: [],
+      traits: { kind: 0, curious: 0, brave: 0 },
+      stats: { hope: 12, memory: 12, courage: 12 },
+      revealed: []
+    };
+
+    const sceneNames = [
+      { scene: "ruined", en: "A ruined city and a desperate plea · 城市废墟，呼救声不断", zh: "城市废墟，呼救声不断 · A ruined city and a desperate plea" },
+      { scene: "river", en: "The archive stirs beneath the river · 河下档案馆正在苏醒", zh: "河下档案馆正在苏醒 · The archive stirs beneath the river" },
+      { scene: "tower", en: "The tower looms over the broken world · 终字之塔俯视破碎世界", zh: "终字之塔俯视破碎世界 · The tower looms over the broken world" }
+    ];
+
+    const gameMain = document.getElementById("game-main");
+    const chapterList = document.getElementById("chapter-list");
+    const progressFill = document.getElementById("progress-fill");
+    const progressCount = document.getElementById("progress-count");
+    const progressLabel = document.getElementById("progress-label");
+    const sceneEl = document.getElementById("scene");
+    const sceneCaption = document.getElementById("scene-caption");
+    const speechStatus = document.getElementById("speech-status");
+    let soundContext;
+    let speechRequestId = 0;
+
+    function stopSpeech() {
+      speechRequestId += 1;
+      if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+    }
+
+    function speakBilingual(englishText, mandarinText, cantoneseText = mandarinText) {
+      const labels = ui[state.language];
+      if (!("speechSynthesis" in window) || !("SpeechSynthesisUtterance" in window)) {
+        speechStatus.textContent = labels.speechUnavailable;
+        return;
+      }
+
+      stopSpeech();
+      const requestId = speechRequestId;
+      let speechFailed = false;
+      speechStatus.textContent = labels.listenStarting;
+      const utterances = [
+        new SpeechSynthesisUtterance(englishText),
+        new SpeechSynthesisUtterance(mandarinText),
+        new SpeechSynthesisUtterance(cantoneseText)
+      ];
+      utterances[0].lang = "en-US";
+      utterances[1].lang = "zh-CN";
+      utterances[2].lang = "zh-HK";
+      utterances.forEach((utterance) => {
+        utterance.rate = 0.85;
+        utterance.onerror = () => {
+          if (requestId === speechRequestId) {
+            speechFailed = true;
+            speechStatus.textContent = labels.speechError;
+          }
+        };
+      });
+      utterances[utterances.length - 1].onend = () => {
+        if (requestId === speechRequestId && !speechFailed) {
+          speechStatus.textContent = labels.listenDone;
+        }
+      };
+      utterances.forEach((utterance) => window.speechSynthesis.speak(utterance));
+    }
+
+    function playSound(kind) {
+      if (!state.soundEnabled) return;
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContextClass) return;
+      soundContext ||= new AudioContextClass();
+      if (soundContext.state === "suspended") soundContext.resume();
+
+      const notes = {
+        tap: [440, 0.08],
+        reveal: [660, 0.2],
+        victory: [784, 0.32],
+        toggle: [520, 0.1]
+      };
+      const [frequency, duration] = notes[kind];
+      const oscillator = soundContext.createOscillator();
+      const gain = soundContext.createGain();
+      const now = soundContext.currentTime;
+      oscillator.type = "sine";
+      oscillator.frequency.setValueAtTime(frequency, now);
+      gain.gain.setValueAtTime(0.0001, now);
+      gain.gain.exponentialRampToValueAtTime(0.045, now + 0.015);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+      oscillator.connect(gain);
+      gain.connect(soundContext.destination);
+      oscillator.start(now);
+      oscillator.stop(now + duration);
+    }
+
+    function dominantTrait() {
+      return Object.entries(state.traits).sort((a, b) => b[1] - a[1])[0][0];
+    }
+
+    function applyHeroBonus(trait) {
+      const bonus = heroes[state.hero];
+      const map = {
+        kind: { hope: 5 + bonus.hope, memory: 3 + Math.round(bonus.memory * 0.15), courage: 2 + Math.round(bonus.courage * 0.12) },
+        curious: { hope: 3 + Math.round(bonus.hope * 0.12), memory: 6 + bonus.memory, courage: 2 + Math.round(bonus.courage * 0.15) },
+        brave: { hope: 2 + Math.round(bonus.hope * 0.15), memory: 2 + Math.round(bonus.memory * 0.12), courage: 8 + bonus.courage }
+      };
+
+      Object.entries(map[trait]).forEach(([key, value]) => {
+        state.stats[key] = Math.min(100, state.stats[key] + value);
+      });
+    }
+
+    function renderScene() {
+      const sceneIndex = Math.min(state.chapterIndex, sceneNames.length - 1);
+      const data = sceneNames[sceneIndex];
+      const previousScene = sceneEl.dataset.scene;
+      const sceneChanged = previousScene && previousScene !== data.scene;
+      sceneEl.classList.remove("arriving");
+      sceneEl.dataset.scene = data.scene;
+      if (sceneChanged) sceneEl.classList.add("arriving");
+      sceneCaption.textContent = state.language === "zh" ? data.zh : data.en;
+      sceneEl.setAttribute("aria-label", data.en.replace(" · ", ", "));
+      sceneEl.querySelector(".city-world")?.remove();
+      const buildings = [
+        { x: "-3%", height: "31%", z: "-180px", turn: "-11deg" },
+        { x: "7%", height: "42%", z: "-130px", turn: "8deg" },
+        { x: "17%", height: "28%", z: "-80px", turn: "-7deg" },
+        { x: "29%", height: "39%", z: "-145px", turn: "10deg" },
+        { x: "41%", height: "27%", z: "-60px", turn: "-8deg" },
+        { x: "55%", height: "44%", z: "-125px", turn: "9deg" },
+        { x: "68%", height: "34%", z: "-70px", turn: "-10deg" },
+        { x: "81%", height: "46%", z: "-150px", turn: "8deg" },
+        { x: "93%", height: "30%", z: "-40px", turn: "-7deg" }
+      ];
+      if (data.scene === "tower") {
+        buildings.push({ x: "45%", height: "55%", z: "72px", turn: "-10deg", landmark: "tower" });
+      }
+      const cityMarkup = `
+        <div class="city-world" data-city="${data.scene}" aria-hidden="true">
+          <div class="city-sky"></div>
+          <div class="city-water"></div>
+          <div class="city-cityscape">
+            ${buildings.map((building) => `
+              <div class="city-building" data-shape="${data.scene === "ruined" ? "ruined" : "intact"}" ${building.landmark ? `data-landmark="${building.landmark}"` : ""}
+                style="--x:${building.x};--height:${building.height};--z:${building.z};--turn:${building.turn}">
+                <span class="city-face front"></span>
+                <span class="city-face side"></span>
+                <span class="city-face roof"></span>
+              </div>
+            `).join("")}
+            <div class="city-ground"></div>
+          </div>
+        </div>
+      `;
+      sceneEl.insertAdjacentHTML("beforeend", cityMarkup);
+      const expression = state.phase === "readingChallenge"
+        ? state.readingFeedback === "correct" ? "happy" : state.readingFeedback === "try" ? "surprised" : "concerned"
+        : state.phase === "question" ? "concerned" : "happy";
+      const pose = state.phase === "readingChallenge" || state.phase === "question"
+        ? "thinking"
+        : state.phase === "story" ? "reassuring" : "neutral";
+      sceneEl.querySelector(".vn-sprite")?.remove();
+      if (state.phase !== "learn" && state.phase !== "practiceDone") {
+        sceneEl.insertAdjacentHTML("beforeend", `
+          <div class="vn-sprite talking" data-character="mina" data-expression="${expression}" data-pose="${pose}" aria-hidden="true">
+            <div class="vn-model">
+              <svg viewBox="0 0 210 390" role="presentation">
+                <defs>
+                  <linearGradient id="hair-shade" x1="0" x2="1" y1="0" y2="1">
+                    <stop offset="0" stop-color="#313b49"/>
+                    <stop offset=".38" stop-color="#10151d"/>
+                    <stop offset=".72" stop-color="#070b11"/>
+                    <stop offset="1" stop-color="#273742"/>
+                  </linearGradient>
+                  <linearGradient id="teal-highlight" x1="0" x2="1">
+                    <stop offset="0" stop-color="#34d2c4" stop-opacity=".35"/>
+                    <stop offset=".48" stop-color="#62f3dc"/>
+                    <stop offset="1" stop-color="#149b9c" stop-opacity=".55"/>
+                  </linearGradient>
+                  <linearGradient id="skin-shade" x1="0" x2="1" y1=".1" y2=".9">
+                    <stop offset="0" stop-color="#ffe2cf"/>
+                    <stop offset=".55" stop-color="#f2bca4"/>
+                    <stop offset="1" stop-color="#c77d78"/>
+                  </linearGradient>
+                  <linearGradient id="coat-shade" x1="0" x2="1" y1="0" y2="1">
+                    <stop offset="0" stop-color="#49677b"/>
+                    <stop offset=".45" stop-color="#243b50"/>
+                    <stop offset="1" stop-color="#101b2c"/>
+                  </linearGradient>
+                  <radialGradient id="iris-shade" cx=".35" cy=".3" r=".75">
+                    <stop offset="0" stop-color="#ffe2b8"/>
+                    <stop offset=".32" stop-color="#bb7946"/>
+                    <stop offset=".78" stop-color="#713e2a"/>
+                    <stop offset="1" stop-color="#281a20"/>
+                  </radialGradient>
+                  <radialGradient id="face-light" cx=".35" cy=".28" r=".75">
+                    <stop offset="0" stop-color="#fff0df" stop-opacity=".7"/>
+                    <stop offset="1" stop-color="#fff0df" stop-opacity="0"/>
+                  </radialGradient>
+                </defs>
+                <ellipse cx="106" cy="374" rx="66" ry="12" fill="rgba(0,0,0,.4)"/>
+                <path class="sprite-hair" d="M58 143 Q45 101 65 68 Q83 40 112 48 Q155 46 163 89 Q171 123 151 166 L158 290 Q141 331 127 304 L130 177 L75 176 L72 309 Q50 336 42 288 Z"/>
+                <path class="sprite-coat" d="M56 211 Q105 181 154 211 L180 370 L32 370 Z"/>
+                <path d="M80 211 L106 247 L132 211 L123 200 L90 200 Z" fill="#f3f5ef"/>
+                <path class="sprite-accent" d="M91 185 L91 219 Q106 231 121 219 L121 184 Z"/>
+                <path d="M58 219 Q28 239 22 296 L47 305 L78 246 M153 219 Q182 239 188 296 L164 305 L133 246" fill="none" stroke="#1b2b40" stroke-width="21" stroke-linecap="round"/>
+                <path d="M57 218 Q34 243 30 286 M153 218 Q176 243 180 286" fill="none" stroke="#557b8b" stroke-opacity=".65" stroke-width="5" stroke-linecap="round"/>
+                <ellipse cx="106" cy="133" rx="43" ry="55" class="sprite-accent"/>
+                <ellipse cx="106" cy="133" rx="43" ry="55" fill="url(#face-light)"/>
+                <ellipse cx="63" cy="143" rx="7" ry="12" class="sprite-accent"/>
+                <ellipse cx="149" cy="143" rx="7" ry="12" class="sprite-accent"/>
+                <path class="sprite-hair" d="M62 128 Q58 71 103 64 Q151 62 153 113 L145 137 Q133 122 129 103 Q108 125 68 119 Z"/>
+                <path class="sprite-highlight" d="M73 77 Q63 105 72 140 L78 166 Q82 174 85 164 L81 125 Q78 97 91 73 Z"/>
+                <path class="sprite-highlight" d="M137 76 Q151 106 142 143 L137 164 Q133 173 130 163 L135 124 Q138 96 124 72 Z"/>
+                <path d="M76 133 Q87 123 99 132 M113 132 Q125 123 137 133" fill="none" stroke="#202534" stroke-width="4" stroke-linecap="round"/>
+                <path d="M77 136 Q88 127 99 136 Q98 155 88 157 Q78 155 77 136 M113 136 Q124 127 135 136 Q134 155 124 157 Q114 155 113 136" fill="#fff9f3" stroke="#252738" stroke-width="2"/>
+                <ellipse cx="88" cy="144" rx="7" ry="11" fill="url(#iris-shade)"/>
+                <ellipse cx="124" cy="144" rx="7" ry="11" fill="url(#iris-shade)"/>
+                <ellipse cx="89" cy="146" rx="3.5" ry="7" fill="#111827"/>
+                <ellipse cx="125" cy="146" rx="3.5" ry="7" fill="#111827"/>
+                <circle cx="91" cy="139" r="3" fill="#fff"/>
+                <circle cx="127" cy="139" r="3" fill="#fff"/>
+                <circle cx="85" cy="150" r="1.5" fill="#d3fff8"/>
+                <circle cx="121" cy="150" r="1.5" fill="#d3fff8"/>
+                <path d="M105 145 Q101 157 105 159" fill="none" stroke="#bd8178" stroke-opacity=".7" stroke-width="2" stroke-linecap="round"/>
+                <path d="M94 163 Q106 166 118 163" fill="none" stroke="#b87470" stroke-opacity=".55" stroke-width="2" stroke-linecap="round"/>
+                <path class="sprite-mouth mouth-happy" d="M92 166 Q106 178 120 166"/>
+                <path class="sprite-mouth mouth-concerned" d="M92 174 Q106 162 120 174"/>
+                <path class="sprite-mouth mouth-surprised" d="M106 163 Q95 174 106 183 Q117 174 106 163"/>
+                <path class="sprite-mouth mouth-serious" d="M94 169 L118 169"/>
+                <path d="M71 154 Q82 160 95 155 M117 155 Q130 160 141 153" fill="none" stroke="#d88788" stroke-opacity=".45" stroke-width="6" stroke-linecap="round"/>
+                <path class="sprite-hair" d="M61 131 Q48 92 75 68 Q74 103 99 108 Q129 112 153 82 Q163 112 148 140 L137 112 Q107 132 72 117 Z"/>
+                <path class="sprite-highlight" d="M76 78 Q69 96 79 116 L86 106 Q81 94 90 76 Z"/>
+                <path class="sprite-highlight" d="M132 78 Q144 94 137 111 L129 102 Q135 92 121 76 Z"/>
+                <path d="M69 94 Q77 76 91 69 M116 68 Q138 72 148 92" fill="none" stroke="#94fff0" stroke-opacity=".28" stroke-width="3" stroke-linecap="round"/>
+                <path d="M66 371 L61 389 L101 389 L103 371 M111 371 L113 389 L153 389 L148 371" fill="#202c3d"/>
+                <circle cx="151" cy="256" r="11" fill="#e9eef4" stroke="#a9c5d0" stroke-width="2"/>
+                <path d="M151 245 A11 11 0 0 0 151 267 A5.5 5.5 0 0 0 151 256 A5.5 5.5 0 0 1 151 245" fill="#1657a0"/>
+                <path d="M151 245 A11 11 0 0 1 151 267 A5.5 5.5 0 0 1 151 256 A5.5 5.5 0 0 0 151 245" fill="#d63b4a"/>
+              </svg>
+            </div>
+          </div>
+        `);
+      }
+    }
+
+    function dialogueMarkup(text, speaker = "Mina Park") {
+      const speakerName = state.language === "zh"
+        ? ({ "Mina Park": "朴米娜" }[speaker] || speaker)
+        : speaker;
+      return `<div class="vn-dialogue"><span class="vn-speaker">${speakerName}</span><br>${text}</div>`;
+    }
+
+    function speakInLanguage(text, language) {
+      const labels = ui[state.language];
+      if (!("speechSynthesis" in window) || !("SpeechSynthesisUtterance" in window)) {
+        speechStatus.textContent = labels.speechUnavailable;
+        return;
+      }
+      stopSpeech();
+      const requestId = speechRequestId;
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = language;
+      utterance.rate = 0.82;
+      speechStatus.textContent = labels.listenStarting;
+      utterance.onend = () => {
+        if (requestId === speechRequestId) speechStatus.textContent = labels.listenDone;
+      };
+      utterance.onerror = () => {
+        if (requestId === speechRequestId) speechStatus.textContent = labels.speechError;
+      };
+      window.speechSynthesis.speak(utterance);
+    }
+
+    function renderReadingChallenge() {
+      const isZh = state.language === "zh";
+      const modeDetails = {
+        mandarin: { label: isZh ? "普通话" : "Mandarin", word: "月亮", pronunciation: "yuè liang", voice: "zh-CN" },
+        cantonese: { label: isZh ? "粤语（广东话）" : "Cantonese", word: "月亮", pronunciation: "jyut6 loeng5", voice: "zh-HK" },
+        english: { label: isZh ? "英语" : "English", word: "moon", pronunciation: "", voice: "en-US" }
+      };
+      const current = modeDetails[state.readingMode];
+      const modes = Object.entries(modeDetails).map(([key, mode]) => `
+        <button type="button" class="action-btn reading-mode" data-mode-choice="${key}" aria-pressed="${state.readingMode === key}" ${state.readingComplete ? "disabled" : ""}>${mode.label}</button>
+      `).join("");
+      const answers = (isZh
+        ? [{ label: "月亮 · moon", correct: true }, { label: "人 · person", correct: false }, { label: "门口 · doorway", correct: false }]
+        : [{ label: "Moon · 月亮", correct: true }, { label: "Person · 人", correct: false }, { label: "Doorway · 门口", correct: false }]);
+      const feedback = state.readingFeedback === "correct"
+        ? (isZh ? "答对了！谢谢你愿意慢慢读。" : "That’s right! Thank you for taking your time.")
+        : state.readingFeedback === "try"
+          ? (isZh ? "没关系，再试一次。你可以听一听。" : "That’s okay—try again, or listen to the word.")
+          : "";
+
+      gameMain.innerHTML = `
+        ${dialogueMarkup(isZh
+          ? "你好，我是朴米娜。我来自韩国，会说英语。我们正在陪伴一位有发展性阅读障碍的学习者练习阅读。这不是考试，请选择你舒服的语言，慢慢来。"
+          : "Hi, I’m Mina Park. I’m Korean, and I speak English. We’re helping a learner with dyslexia practise reading. This isn’t a test—choose a comfortable language and take your time.", "Mina Park")}
+        <div class="vn-question-backdrop" aria-hidden="true"></div>
+        <section class="vn-question-popup" role="dialog" aria-modal="true" aria-labelledby="reading-question-title">
+          <p class="story-kicker">${isZh ? "第一题 · 慢慢来" : "FIRST QUESTION · TAKE YOUR TIME"}</p>
+          <h2 class="question-title" id="reading-question-title" tabindex="-1">${isZh ? "选择你想用的语言" : "Choose how you’d like to read"}</h2>
+          <div class="reading-modes" role="group" aria-label="${isZh ? "选择阅读语言" : "Choose reading language"}">${modes}</div>
+          <p class="practice-copy">${isZh ? "读一读下面的词语，然后选择它的意思。可以听读音，也可以不计时地多试几次。" : "Read the word below, then choose its meaning. You can listen, take your time, and try again as often as you like."}</p>
+          <span class="reading-word" lang="${state.readingMode === "english" ? "en" : "zh"}">${current.word}</span>
+          ${current.pronunciation ? `<p class="reading-pronunciation">${current.pronunciation}</p>` : ""}
+          <div class="reading-answers" role="group" aria-label="${isZh ? "选择词语意思" : "Choose the word’s meaning"}">
+            ${answers.map((answer) => `<button type="button" class="answer-btn reading-answer" data-correct="${answer.correct}" ${state.readingComplete ? "disabled" : ""}><strong>${answer.label}</strong></button>`).join("")}
+          </div>
+          <p class="reading-feedback" role="status" aria-live="polite">${feedback}</p>
+          <div class="practice-actions">
+            <button type="button" class="listen-btn" id="listen-reading-word">${isZh ? "🔊 听读音" : "🔊 Listen to the word"}</button>
+            ${state.readingComplete ? `<button type="button" class="primary-btn" id="continue-reading">${isZh ? "继续冒险 →" : "Continue the story →"}</button>` : ""}
+          </div>
+        </section>
+      `;
+      gameMain.querySelectorAll("[data-mode-choice]").forEach((button) => {
+        button.addEventListener("click", () => {
+          state.readingMode = button.dataset.modeChoice;
+          state.readingFeedback = "";
+          render();
+        });
+      });
+      gameMain.querySelectorAll(".reading-answer").forEach((button) => {
+        button.addEventListener("click", () => {
+          state.readingFeedback = button.dataset.correct === "true" ? "correct" : "try";
+          state.readingComplete = state.readingFeedback === "correct";
+          if (state.readingComplete) playSound("reveal");
+          render();
+        });
+      });
+      document.getElementById("listen-reading-word").addEventListener("click", () => speakInLanguage(current.word, current.voice));
+      document.getElementById("continue-reading")?.addEventListener("click", () => {
+        state.phase = "catalog";
+        state.chapterIndex = 0;
+        state.questionIndex = 0;
+        state.readingMode = "mandarin";
+        state.readingFeedback = "";
+        state.readingComplete = false;
+        render();
+      });
+      document.getElementById("reading-question-title").focus();
+    }
+
+    function renderProgress() {
+      const answered = state.answers.length;
+      const total = chapters.length * 3;
+      progressLabel.textContent = ui[state.language].progress;
+      progressCount.textContent = `${answered} / ${total}`;
+      progressFill.style.width = `${(answered / total) * 100}%`;
+      progressFill.parentElement.setAttribute("aria-valuenow", String(answered));
+
+      chapterList.innerHTML = chapters.map((chapter, idx) => {
+        const active = state.phase !== "start" && state.phase !== "ending" && state.chapterIndex === idx;
+        const done = state.revealed[idx] !== undefined;
+        const mark = done ? "✓" : idx + 1;
+        return `<li class="${done ? "done" : ""} ${active ? "active" : ""}"><span class="chapter-dot">${mark}</span><span>${ui[state.language].choices ? ui[state.language].choices[idx] : chapter.title}</span></li>`;
+      }).join("");
+    }
+
+    function renderStats() {
+      const panel = document.getElementById("stat-grid");
+      const labels = ui[state.language].stats;
+      panel.innerHTML = `
+        <div class="stat-box"><span class="stat-label">${labels.hope}</span><span class="stat-value">${state.stats.hope}</span></div>
+        <div class="stat-box"><span class="stat-label">${labels.memory}</span><span class="stat-value">${state.stats.memory}</span></div>
+        <div class="stat-box"><span class="stat-label">${labels.courage}</span><span class="stat-value">${state.stats.courage}</span></div>
+      `;
+    }
+
+    function renderHeaderText() {
+      const labels = ui[state.language];
+      const learning = state.phase === "learn" || state.phase === "practiceDone";
+      const learningLabels = practiceUi[state.language];
+      document.getElementById("eyebrow").textContent = learning ? learningLabels.eyebrow : labels.eyebrow;
+      document.getElementById("page-title").firstChild.nodeValue = learning ? learningLabels.title : state.language === "en" ? "The city is ruined" : "城市被摧毁";
+      document.getElementById("page-title-zh").textContent = learning ? learningLabels.titleZh : state.language === "en" ? "城市被摧毁" : "The city is ruined";
+      document.getElementById("intro-copy").textContent = learning ? learningLabels.intro : labels.intro;
+      document.getElementById("side-title").textContent = state.language === "en" ? "Your mission" : "你的任务";
+      document.getElementById("language-toggle").textContent = state.language === "en" ? "中 / EN" : "EN / 中";
+      renderFontToggle();
+      const practiceToggle = document.getElementById("practice-toggle");
+      practiceToggle.textContent = learningLabels.returnPractice;
+      practiceToggle.hidden = learning;
+      document.body.dataset.mode = learning ? "learn" : "story";
+      const soundToggle = document.getElementById("sound-toggle");
+      soundToggle.textContent = state.soundEnabled ? labels.soundOn : labels.soundOff;
+      soundToggle.setAttribute("aria-pressed", String(state.soundEnabled));
+      document.getElementById("easy-toggle").textContent = state.accessible ? labels.normal : labels.easy;
+      document.getElementById("reset-button").textContent = labels.restart;
+      document.documentElement.lang = state.language === "en" ? "en" : "zh-CN";
+      document.body.dataset.reading = state.accessible ? "easy" : "normal";
+    }
+
+    function renderFontToggle() {
+      const fontToggle = document.getElementById("font-toggle");
+      fontToggle.textContent = ui[state.language][state.roundedFont ? "fontRounded" : "fontSerif"];
+      fontToggle.setAttribute("aria-pressed", String(state.roundedFont));
+      document.body.dataset.characterFont = state.roundedFont ? "rounded" : "serif";
+    }
+
+    function formatPronunciation(pronunciation) {
+      return pronunciation.replace(/[āáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜ]/g, (toneMark) => `<span class="tone-mark">${toneMark}</span>`);
+    }
+
+    function formatPinyin(pinyin) {
+      return formatPronunciation(pinyin);
+    }
+
+    function renderPractice() {
+      const labels = practiceUi[state.language];
+      const lesson = characterLessons[state.lessonIndex];
+      const progress = `${labels.progress} ${state.lessonIndex + 1} / ${characterLessons.length}`;
+      const storyButton = `<button type="button" class="action-btn" id="story-adventure">${labels.storyAdventure}</button>`;
+
+      if (state.phase === "practiceDone") {
+        gameMain.innerHTML = `
+          <section aria-labelledby="practice-complete-title">
+            <h2 class="practice-heading" id="practice-complete-title">${labels.completeTitle}</h2>
+            <p class="practice-copy">${labels.completeCopy}</p>
+            <div class="practice-actions">
+              <button type="button" class="primary-btn" id="practice-again">${labels.practiceAgain}</button>
+              ${storyButton}
+            </div>
+          </section>
+        `;
+        document.getElementById("practice-again").addEventListener("click", () => {
+          state.lessonIndex = 0;
+          state.practiceStep = "study";
+          state.practiceFeedback = "";
+          state.phase = "learn";
+          render();
+        });
+        document.getElementById("story-adventure").addEventListener("click", () => {
+          state.phase = "start";
+          render();
+        });
+        return;
+      }
+
+      const sharedHeader = `<p class="practice-progress">${progress}</p>`;
+      if (state.practiceStep === "study") {
+        gameMain.innerHTML = `
+          ${sharedHeader}
+          <h2 class="practice-heading">${labels.studyTitle}</h2>
+          <p class="practice-copy">${labels.studyCopy}</p>
+          <div class="character-card">
+            <div class="character-glyph" lang="zh-CN" aria-label="${lesson.character}">${lesson.character}</div>
+            <p class="character-details">
+              <strong>${labels.pinyin}:</strong> <span class="pinyin-value">${formatPinyin(lesson.mandarin)}</span><br>
+              <strong>${labels.cantonese}:</strong> <span class="cantonese-value">${lesson.cantonese}</span><br>
+              <strong>${labels.meaning}:</strong> ${lesson.meaning} · ${lesson.meaningZh}<br>
+              <strong>${labels.example}:</strong> <span lang="zh-CN">${lesson.word}</span> (${formatPinyin(lesson.wordMandarin)}) / ${lesson.wordCantonese} — ${lesson.wordMeaning}
+            </p>
+          </div>
+          <div class="practice-actions">
+            <button type="button" class="listen-btn" id="listen-character">${labels.listen}</button>
+            <button type="button" class="primary-btn" id="practice-writing-button">${labels.practiceWriting}</button>
+            ${storyButton}
+          </div>
+        `;
+        document.getElementById("listen-character").addEventListener("click", () => {
+          speakBilingual(lesson.meaning, `${lesson.character}。${lesson.word}`, `${lesson.character}。${lesson.word}`);
+        });
+        document.getElementById("practice-writing-button").addEventListener("click", () => {
+          state.practiceStep = "write";
+          state.practiceFeedback = "";
+          render();
+        });
+      } else if (state.practiceStep === "identify") {
+        const answerSlot = (state.lessonIndex + 1) % characterLessons.length;
+        const options = characterLessons.filter((_, index) => index !== state.lessonIndex);
+        options.splice(answerSlot, 0, lesson);
+        gameMain.innerHTML = `
+          ${sharedHeader}
+          <h2 class="practice-heading">${labels.chooseTitle}</h2>
+          <p class="practice-copy">${labels.chooseCopy} <strong>${lesson.meaning}</strong> (${lesson.meaningZh})?</p>
+          <div class="practice-options" role="group" aria-label="${labels.chooseTitle}">
+            ${options.map((option, index) => `<button type="button" class="character-option" data-answer="${option.character}" lang="zh-CN" aria-label="${option.character}">${option.character}</button>`).join("")}
+          </div>
+          <p class="practice-feedback ${state.practiceFeedback === "try" ? "try-again" : ""}" role="status" aria-live="polite">${state.practiceFeedback === "try" ? labels.tryAgain : state.practiceFeedback === "correct" ? `${labels.correct} ${lesson.character} (${formatPinyin(lesson.mandarin)}) / ${lesson.cantonese} — ${lesson.meaning}.` : ""}</p>
+          <div class="practice-actions">${storyButton}</div>
+        `;
+        gameMain.querySelectorAll(".character-option").forEach((button) => {
+          button.addEventListener("click", () => {
+            if (button.dataset.answer === lesson.character) {
+              state.practiceStep = "write";
+              state.practiceFeedback = "correct";
+            } else {
+              state.practiceFeedback = "try";
+            }
+            render();
+          });
+        });
+      } else {
+        gameMain.innerHTML = `
+          ${sharedHeader}
+          <h2 class="practice-heading">${labels.writeTitle}</h2>
+          <p class="practice-copy">${labels.writeCopy}</p>
+          <div class="character-details">
+            <strong lang="zh-CN">${lesson.character}</strong> · ${labels.pinyin}: <span class="pinyin-value">${formatPinyin(lesson.mandarin)}</span> · ${labels.cantonese}: <span class="cantonese-value">${lesson.cantonese}</span><br>
+            <span lang="zh-CN">${lesson.word}</span> (${formatPinyin(lesson.wordMandarin)}) / ${lesson.wordCantonese} — ${lesson.wordMeaning}
+          </div>
+            <p class="practice-feedback" role="status" aria-live="polite">${state.practiceFeedback === "correct" ? `${labels.correct} ${lesson.character} (${formatPinyin(lesson.mandarin)}) / ${lesson.cantonese} — ${lesson.meaning}.` : ""}</p>
+          <div class="write-board">
+            <span class="write-guide" aria-hidden="true">${lesson.character}</span>
+            <canvas id="writing-canvas" role="img" aria-label="${labels.writingLabel}"></canvas>
+          </div>
+          <p class="practice-footnote">${labels.writingNote}</p>
+          <div class="practice-actions">
+            <button type="button" class="action-btn" id="clear-writing">${labels.clear}</button>
+            <button type="button" class="primary-btn" id="next-character">${state.lessonIndex === characterLessons.length - 1 ? labels.finish : labels.next}</button>
+            <button type="button" class="action-btn" id="skip-writing">${labels.skip}</button>
+            ${storyButton}
+          </div>
+        `;
+        setupWritingCanvas();
+        document.getElementById("clear-writing").addEventListener("click", () => {
+          setupWritingCanvas();
+        });
+        const advance = () => {
+          if (state.lessonIndex === characterLessons.length - 1) {
+            state.phase = "practiceDone";
+          } else {
+            state.lessonIndex += 1;
+            state.practiceStep = "study";
+            state.practiceFeedback = "";
+          }
+          render();
+        };
+        document.getElementById("next-character").addEventListener("click", advance);
+        document.getElementById("skip-writing").addEventListener("click", advance);
+      }
+
+      document.getElementById("story-adventure").addEventListener("click", () => {
+        state.phase = "start";
+        render();
+      });
+    }
+
+    function setupWritingCanvas() {
+      const canvas = document.getElementById("writing-canvas");
+      const context = canvas.getContext("2d");
+      const bounds = canvas.getBoundingClientRect();
+      const scale = window.devicePixelRatio || 1;
+      canvas.width = Math.round(bounds.width * scale);
+      canvas.height = Math.round(bounds.height * scale);
+      context.scale(scale, scale);
+      context.lineWidth = 7;
+      context.lineCap = "round";
+      context.lineJoin = "round";
+      context.strokeStyle = "#f2bf58";
+      let drawing = false;
+
+      canvas.addEventListener("pointerdown", (event) => {
+        drawing = true;
+        canvas.setPointerCapture(event.pointerId);
+        const rect = canvas.getBoundingClientRect();
+        context.beginPath();
+        context.moveTo(event.clientX - rect.left, event.clientY - rect.top);
+      });
+      canvas.addEventListener("pointermove", (event) => {
+        if (!drawing) return;
+        const rect = canvas.getBoundingClientRect();
+        context.lineTo(event.clientX - rect.left, event.clientY - rect.top);
+        context.stroke();
+      });
+      const stopDrawing = () => {
+        drawing = false;
+      };
+      canvas.addEventListener("pointerup", stopDrawing);
+      canvas.addEventListener("pointercancel", stopDrawing);
+      canvas.addEventListener("lostpointercapture", stopDrawing);
+    }
+
+    function renderStart() {
+      const labels = ui[state.language];
+      const heroCards = Object.entries(heroes).map(([key], index) => `
+        <button type="button" class="hero-card ${state.hero === key ? "selected" : ""}" data-hero="${key}" style="--entry-delay: ${index * 100}ms">
+          <span class="hero-role">${labels.heroNames[key]}</span>
+          <h2>${labels.heroNames[key]}</h2>
+          <p>${labels.heroCopy[key]}</p>
+        </button>
+      `).join("");
+
+      gameMain.innerHTML = `
+        ${dialogueMarkup(state.language === "zh"
+          ? "你好，我是朴米娜。我来自韩国，会说英语。这座城市失去了文字。你愿意和我一起慢慢找回来吗？"
+          : "Hi, I’m Mina Park. I’m Korean, and I speak English. This city has lost its words. Will you help me find them, one step at a time?", "Mina Park")}
+        <div class="chapter-head">
+          <span class="chapter-number">01</span>
+          <div class="chapter-meta"><strong>${chapters[0].title} · ${chapters[0].titleZh}</strong>${labels.chapter} 1 · ${labels.question} 1 of 3</div>
+        </div>
+        <p class="question-title" style="margin-bottom: 0;">${labels.roleLabel}</p>
+        <div class="summary-box" style="margin-top: 8px; margin-bottom: 18px;"><strong>${labels.roleLabel}</strong> — ${labels.rolePrompt}</div>
+        <div class="summary-box" style="margin-top: 0; margin-bottom: 18px;">${labels.support}</div>
+        <h3 class="process-title">${labels.processTitle}</h3>
+        <ol class="process-steps">${labels.steps.map((step, index) => `<li><span aria-hidden="true">${index + 1}</span><span>${step}</span></li>`).join("")}</ol>
+        <div class="hero-grid">${heroCards}</div>
+        <button type="button" class="primary-btn" id="start-button">${labels.start} →</button>
+        <button type="button" class="action-btn" id="back-to-practice">${practiceUi[state.language].returnPractice}</button>
+      `;
+
+      gameMain.querySelectorAll(".hero-card").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          state.hero = btn.dataset.hero;
+          render();
+        });
+      });
+
+      document.getElementById("start-button").addEventListener("click", () => {
+        playSound("tap");
+        state.phase = "readingChallenge";
+        state.readingFeedback = "";
+        state.readingComplete = false;
+        render();
+      });
+      document.getElementById("back-to-practice").addEventListener("click", () => {
+        state.phase = "learn";
+        render();
+      });
+    }
+
+    function renderCatalog() {
+      const labels = ui[state.language];
+      const nextLevel = chapters.findIndex((_, index) => state.revealed[index] === undefined);
+      const icons = ["🏙️", "🦊", "🗼"];
+      const cards = chapters.map((chapter, index) => {
+        const isComplete = state.revealed[index] !== undefined;
+        const isAvailable = index === nextLevel;
+        const status = isComplete ? labels.complete : isAvailable ? labels.available : labels.locked;
+        const cardClass = `level-card ${isComplete ? "complete" : isAvailable ? "available" : "locked"}`;
+        const content = `
+          <div class="level-art" data-level="${index + 1}">
+            <span class="level-art-icon" aria-hidden="true">${icons[index]}</span>
+            <span class="level-number">${labels.chapter} ${index + 1}</span>
+          </div>
+          <div class="level-copy">
+            <div class="level-status"><span>${labels.chapter} ${index + 1} / 3</span><strong>${status}</strong></div>
+            <h3>${state.language === "zh" ? chapter.titleZh : chapter.title}</h3>
+            <p>${labels.levelSummaries[index]}</p>
+            <span class="level-action">${isAvailable ? labels.playLevel : isComplete ? "✓" : "🔒"}</span>
+          </div>
+        `;
+        return isAvailable
+          ? `<button class="${cardClass}" type="button" data-level-index="${index}" style="--entry-delay: ${index * 100}ms">${content}</button>`
+          : `<article class="${cardClass}" style="--entry-delay: ${index * 100}ms">${content}</article>`;
+      }).join("");
+
+      gameMain.innerHTML = `
+        ${dialogueMarkup(state.language === "zh"
+          ? "做得很好！我们可以继续找回城市里失去的文字。选一个地方开始吧。"
+          : "You did well. We can keep helping the city recover its words. Choose where to begin.", "Mina Park")}
+        <div class="chapter-head">
+          <span class="chapter-number">✦</span>
+          <div class="chapter-meta"><strong>${labels.catalogTitle}</strong>${labels.chapter} ${Math.min(nextLevel + 1, chapters.length)} / ${chapters.length}</div>
+        </div>
+        <p class="catalog-intro">${labels.catalogIntro}</p>
+        <div class="catalog-grid">${cards}</div>
+      `;
+
+      gameMain.querySelectorAll(".level-card.available").forEach((card) => {
+        card.addEventListener("click", () => {
+          playSound("tap");
+          state.chapterIndex = Number(card.dataset.levelIndex);
+          state.questionIndex = 0;
+          state.phase = "question";
+          render();
+        });
+      });
+    }
+
+    function renderQuestion() {
+      const chapter = chapters[state.chapterIndex];
+      const question = chapter.questions[state.questionIndex];
+      const labels = ui[state.language];
+      gameMain.innerHTML = `
+        ${dialogueMarkup(state.language === "zh"
+          ? "看看这个问题。花点时间读一读，再选择最适合的答案。"
+          : "Take a look at this question. Read it at your own pace, then choose the answer that feels right.", "Mina Park")}
+        <div class="vn-question-backdrop" aria-hidden="true"></div>
+        <section class="vn-question-popup vn-question-area" role="dialog" aria-modal="true" aria-labelledby="story-question-title">
+          <div class="chapter-head">
+            <span class="chapter-number">0${state.chapterIndex + 1}</span>
+            <div class="chapter-meta"><strong>${chapter.title} · ${chapter.titleZh}</strong>${labels.question} ${state.questionIndex + 1} of 3</div>
+          </div>
+          <h2 class="question-title" id="story-question-title" tabindex="-1">${question.en}</h2>
+          <p class="question-zh">${question.zh}</p>
+          <button type="button" class="listen-btn" id="listen-question">${labels.listen}</button>
+          <div class="answers">
+            ${question.answers.map((answer, idx) => `
+              <button class="answer-btn" type="button" data-index="${idx}" style="--entry-delay: ${idx * 85}ms">
+                <strong>${answer.en}</strong>
+                <span>${answer.zh}</span>
+              </button>
+            `).join("")}
+          </div>
+        </section>
+      `;
+
+      gameMain.querySelectorAll(".answer-btn").forEach((btn) => {
+        btn.addEventListener("click", () => chooseAnswer(Number(btn.dataset.index)));
+      });
+      document.getElementById("listen-question").addEventListener("click", () => {
+        const englishText = [question.en, ...question.answers.map((answer) => answer.en)].join(". ");
+        const chineseText = [question.zh, ...question.answers.map((answer) => answer.zh)].join("。");
+        speakBilingual(englishText, chineseText);
+      });
+      document.getElementById("story-question-title").focus();
+    }
+
+    function chooseAnswer(index) {
+      playSound("tap");
+      const chapter = chapters[state.chapterIndex];
+      const answer = chapter.questions[state.questionIndex].answers[index];
+      state.answers.push(answer);
+      state.traits[answer.trait] += 1;
+      applyHeroBonus(answer.trait);
+      state.questionIndex += 1;
+
+      if (state.questionIndex === 3) {
+        playSound("reveal");
+        document.body.classList.add("dramatic-shake");
+        window.setTimeout(() => document.body.classList.remove("dramatic-shake"), 400);
+        const trait = dominantTrait();
+        state.revealed[state.chapterIndex] = chapters[state.chapterIndex].story[trait];
+        state.phase = "story";
+      }
+
+      render();
+    }
+
+    function renderStory() {
+      const labels = ui[state.language];
+      const chapter = chapters[state.chapterIndex];
+      const story = state.revealed[state.chapterIndex];
+      const isLast = state.chapterIndex === chapters.length - 1;
+
+      gameMain.innerHTML = `
+        ${dialogueMarkup(state.language === "zh"
+          ? "城市里的灯又亮起来了。谢谢你愿意帮助大家。"
+          : "The city lights are coming back. Thank you for taking the time to help.", "Mina Park")}
+        <article class="story-panel">
+          <p class="story-kicker">${labels.chapter} ${state.chapterIndex + 1} · Part ${state.chapterIndex + 1} of 3</p>
+          <h2 class="story-title">${story[0]}</h2>
+          <p class="story-title-zh">${story[1]}</p>
+          <div class="summary-box" style="margin-bottom: 18px;">${labels.support}</div>
+          <button type="button" class="listen-btn" id="listen-story">${labels.listen}</button>
+          <p class="story-copy">${story[2]}</p>
+          <p class="story-copy-zh">${story[3]}</p>
+          <button type="button" class="primary-btn" id="continue-button">${isLast ? labels.finish : labels.nextStory} →</button>
+        </article>
+      `;
+
+      document.getElementById("listen-story").addEventListener("click", () => {
+        speakBilingual(`${story[0]}. ${story[2]}`, `${story[1]}。${story[3]}`);
+      });
+
+      document.getElementById("continue-button").addEventListener("click", () => {
+        if (isLast) {
+          playSound("victory");
+          state.phase = "ending";
+        } else {
+          playSound("tap");
+          state.chapterIndex += 1;
+          state.questionIndex = 0;
+          state.phase = "catalog";
+        }
+        render();
+      });
+    }
+
+    function renderEnding() {
+      const labels = ui[state.language];
+      const endingTrait = dominantTrait();
+      const [title, copy, titleZh] = labels.endingCopy[endingTrait];
+      const summary = `${labels.heroNames[state.hero]} · ${labels.stats.hope}: ${state.stats.hope} · ${labels.stats.memory}: ${state.stats.memory} · ${labels.stats.courage}: ${state.stats.courage}`;
+
+      gameMain.innerHTML = `
+        ${dialogueMarkup(state.language === "zh"
+          ? "我曾以为可以控制文字。现在我明白了：每个人都应该用自己的方式学习。"
+          : "I thought words could be controlled. Now I understand: everyone deserves to learn in their own way.", "Mina Park")}
+        <article class="story-panel">
+          <p class="story-kicker">${labels.ending}</p>
+          <h2 class="story-title">${title}</h2>
+          <p class="story-title-zh">${titleZh}</p>
+          <div class="summary-box" style="margin-bottom: 18px;">${summary}</div>
+          <p class="story-copy">${copy}</p>
+          <p class="story-copy-zh">${titleZh === "The Keeper of Small Lights" ? "微光守护者" : titleZh}</p>
+          <button type="button" class="primary-btn" id="again-button">${labels.again} ↻</button>
+        </article>
+      `;
+
+      document.getElementById("again-button").addEventListener("click", resetGame);
+    }
+
+    function resetGame() {
+      state.phase = "start";
+      state.lessonIndex = 0;
+      state.practiceStep = "study";
+      state.practiceFeedback = "";
+      state.chapterIndex = 0;
+      state.questionIndex = 0;
+      state.readingMode = "mandarin";
+      state.readingFeedback = "";
+      state.readingComplete = false;
+      state.accessible = true;
+      state.answers = [];
+      state.traits = { kind: 0, curious: 0, brave: 0 };
+      state.stats = { hope: 12, memory: 12, courage: 12 };
+      state.revealed = [];
+      render();
+    }
+
+    function render() {
+      stopSpeech();
+      renderHeaderText();
+      renderScene();
+      renderProgress();
+      renderStats();
+
+      if (state.phase === "learn" || state.phase === "practiceDone") return renderPractice();
+      if (state.phase === "start") return renderStart();
+      if (state.phase === "readingChallenge") return renderReadingChallenge();
+      if (state.phase === "catalog") return renderCatalog();
+      if (state.phase === "question") return renderQuestion();
+      if (state.phase === "story") return renderStory();
+      return renderEnding();
+    }
+
+    document.getElementById("language-toggle").addEventListener("click", () => {
+      state.language = state.language === "en" ? "zh" : "en";
+      render();
+    });
+
+    document.getElementById("font-toggle").addEventListener("click", () => {
+      state.roundedFont = !state.roundedFont;
+      renderFontToggle();
+    });
+
+    document.getElementById("practice-toggle").addEventListener("click", () => {
+      state.phase = "learn";
+      render();
+    });
+
+    document.getElementById("sound-toggle").addEventListener("click", () => {
+      state.soundEnabled = !state.soundEnabled;
+      render();
+      playSound("toggle");
+    });
+
+    document.getElementById("easy-toggle").addEventListener("click", () => {
+      state.accessible = !state.accessible;
+      render();
+    });
+
+    document.getElementById("reset-button").addEventListener("click", () => {
+      if (state.answers.length === 0 || window.confirm(state.language === "en" ? "Restart the mission from the beginning?" : "要从头重新开始任务吗？")) {
+        resetGame();
+      }
+    });
+
+    render();
+  </script>
+</body>
+</html>
